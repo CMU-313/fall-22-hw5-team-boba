@@ -1,0 +1,24 @@
+name: Run ESLint CI
+on:
+  push:
+    branches: 
+      - 'eslint-ci'
+    tags: [v*]
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Install all modules
+        run: npm install
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Execute Eslint
+        run: npm run lint --fix
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
