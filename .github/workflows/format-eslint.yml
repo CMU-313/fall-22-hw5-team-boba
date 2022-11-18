@@ -15,10 +15,6 @@ jobs:
 
       - name: Install all modules
         run: npm install
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Execute Eslint
         run: npm run lint --fix
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
