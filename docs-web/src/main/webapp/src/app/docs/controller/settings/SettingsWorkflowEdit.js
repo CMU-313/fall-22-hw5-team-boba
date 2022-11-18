@@ -1,10 +1,7 @@
-
-'use strict';
-
 /**
  * Settings workflow edition page controller.
  */
-angular.module('docs').controller('SettingsWorkflowEdit', function($scope, $dialog, $state, $stateParams, Restangular, $translate, $q) {
+angular.module('docs').controller('SettingsWorkflowEdit', ($scope, $dialog, $state, $stateParams, Restangular, $translate, $q) => {
   /**
    * UI sortable options.
    */
@@ -12,33 +9,33 @@ angular.module('docs').controller('SettingsWorkflowEdit', function($scope, $dial
     forceHelperSize: true,
     forcePlaceholderSize: true,
     tolerance: 'pointer',
-    handle: '.handle'
+    handle: '.handle',
   };
 
   /**
    * Auto-complete on ACL target.
    */
-  $scope.getTargetAclTypeahead = function($viewValue) {
-    var deferred = $q.defer();
+  $scope.getTargetAclTypeahead = function ($viewValue) {
+    const deferred = $q.defer();
     Restangular.one('acl/target/search')
       .get({
-        search: $viewValue
-      }).then(function(data) {
-      var output = [];
+        search: $viewValue,
+      }).then((data) => {
+        const output = [];
 
-      // Add the type to use later
-      output.push.apply(output,  _.map(data.users, function(user) {
-        user.type = 'USER';
-        return user;
-      }));
-      output.push.apply(output, _.map(data.groups, function(group) {
-        group.type = 'GROUP';
-        return group;
-      }));
+        // Add the type to use later
+        output.push.apply(output, _.map(data.users, (user) => {
+          user.type = 'USER';
+          return user;
+        }));
+        output.push.apply(output, _.map(data.groups, (group) => {
+          group.type = 'GROUP';
+          return group;
+        }));
 
-      // Send the data to the typeahead directive
-      deferred.resolve(output, true);
-    });
+        // Send the data to the typeahead directive
+        deferred.resolve(output, true);
+      });
     return deferred.promise;
   };
 
@@ -46,8 +43,8 @@ angular.module('docs').controller('SettingsWorkflowEdit', function($scope, $dial
    * Add a workflow step.
    */
   $scope.addStep = function () {
-    var step = {
-      type: 'VALIDATE'
+    const step = {
+      type: 'VALIDATE',
     };
     $scope.updateTransitions(step);
     $scope.workflow.steps.push(step);
@@ -59,22 +56,21 @@ angular.module('docs').controller('SettingsWorkflowEdit', function($scope, $dial
   $scope.isEdit = function () {
     return $stateParams.id;
   };
-  
+
   /**
    * Update the current workflow.
    */
   $scope.edit = function () {
-    var promise = null;
+    let promise = null;
 
     // Cleanup the workflow data
-    var workflow = angular.copy($scope.workflow);
-    _.each(workflow.steps, function (step) {
-      _.each(step.transitions, function (transition) {
+    const workflow = angular.copy($scope.workflow);
+    _.each(workflow.steps, (step) => {
+      _.each(step.transitions, (transition) => {
         delete transition.actionType;
       });
     });
     workflow.steps = JSON.stringify(workflow.steps);
-
 
     if ($scope.isEdit()) {
       promise = Restangular
@@ -85,8 +81,8 @@ angular.module('docs').controller('SettingsWorkflowEdit', function($scope, $dial
         .one('routemodel')
         .put(workflow);
     }
-    
-    promise.then(function () {
+
+    promise.then(() => {
       $scope.loadWorkflows();
       $state.go('settings.workflow');
     });
@@ -96,19 +92,19 @@ angular.module('docs').controller('SettingsWorkflowEdit', function($scope, $dial
    * Delete the current workflow.
    */
   $scope.remove = function () {
-    var title = $translate.instant('settings.workflow.edit.delete_workflow_title');
-    var msg = $translate.instant('settings.workflow.edit.delete_workflow_message');
-    var btns = [
-      { result:'cancel', label: $translate.instant('cancel') },
-      { result:'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' }
+    const title = $translate.instant('settings.workflow.edit.delete_workflow_title');
+    const msg = $translate.instant('settings.workflow.edit.delete_workflow_message');
+    const btns = [
+      { result: 'cancel', label: $translate.instant('cancel') },
+      { result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' },
     ];
 
-    $dialog.messageBox(title, msg, btns, function (result) {
+    $dialog.messageBox(title, msg, btns, (result) => {
       if (result === 'ok') {
-        Restangular.one('routemodel', $stateParams.id).remove().then(function () {
+        Restangular.one('routemodel', $stateParams.id).remove().then(() => {
           $scope.loadWorkflows();
           $state.go('settings.workflow');
-        }, function() {
+        }, () => {
           $state.go('settings.workflow');
         });
       }
@@ -130,17 +126,17 @@ angular.module('docs').controller('SettingsWorkflowEdit', function($scope, $dial
       step.transitions = [{
         name: 'VALIDATED',
         actions: [],
-        actionType: 'ADD_TAG'
+        actionType: 'ADD_TAG',
       }];
     } else if (step.type === 'APPROVE') {
       step.transitions = [{
         name: 'APPROVED',
         actions: [],
-        actionType: 'ADD_TAG'
+        actionType: 'ADD_TAG',
       }, {
         name: 'REJECTED',
         actions: [],
-        actionType: 'ADD_TAG'
+        actionType: 'ADD_TAG',
       }];
     }
   };
@@ -154,7 +150,7 @@ angular.module('docs').controller('SettingsWorkflowEdit', function($scope, $dial
     }
 
     transition.actions.push({
-      type: transition.actionType
+      type: transition.actionType,
     });
   };
 
@@ -166,7 +162,7 @@ angular.module('docs').controller('SettingsWorkflowEdit', function($scope, $dial
   };
 
   // Fetch tags
-  Restangular.one('tag/list').get().then(function(data) {
+  Restangular.one('tag/list').get().then((data) => {
     $scope.tags = data.tags;
   });
 
@@ -174,10 +170,10 @@ angular.module('docs').controller('SettingsWorkflowEdit', function($scope, $dial
    * In edit mode, load the current workflow.
    */
   if ($scope.isEdit()) {
-    Restangular.one('routemodel', $stateParams.id).get().then(function (data) {
+    Restangular.one('routemodel', $stateParams.id).get().then((data) => {
       $scope.workflow = data;
       $scope.workflow.steps = JSON.parse(data.steps);
-      _.each($scope.workflow.steps, function (step) {
+      _.each($scope.workflow.steps, (step) => {
         if (!step.transitions) {
           // Patch for old route models
           $scope.updateTransitions(step);
@@ -186,7 +182,7 @@ angular.module('docs').controller('SettingsWorkflowEdit', function($scope, $dial
     });
   } else {
     $scope.workflow = {
-      steps: []
+      steps: [],
     };
     $scope.addStep();
   }

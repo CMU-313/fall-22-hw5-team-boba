@@ -1,28 +1,26 @@
-'use strict';
-
 /**
  * Settings config page controller.
  */
-angular.module('docs').controller('SettingsConfig', function($scope, $rootScope, Restangular) {
+angular.module('docs').controller('SettingsConfig', ($scope, $rootScope, Restangular) => {
   // Get the app configuration
-  Restangular.one('app').get().then(function (data) {
+  Restangular.one('app').get().then((data) => {
     $rootScope.app = data;
     $scope.general = {
-      default_language: data.default_language
-    }
+      default_language: data.default_language,
+    };
   });
 
   // Enable/disable guest login
   $scope.changeGuestLogin = function (enabled) {
     Restangular.one('app').post('guest_login', {
-      enabled: enabled
-    }).then(function () {
+      enabled,
+    }).then(() => {
       $scope.app.guest_login = enabled;
     });
   };
 
   // Fetch the current theme configuration
-  Restangular.one('theme').get().then(function (data) {
+  Restangular.one('theme').get().then((data) => {
     $scope.theme = data;
     $rootScope.appName = $scope.theme.name;
   });
@@ -30,23 +28,23 @@ angular.module('docs').controller('SettingsConfig', function($scope, $rootScope,
   // Update the theme
   $scope.update = function () {
     $scope.theme.name = $scope.theme.name.length === 0 ? 'Teedy' : $scope.theme.name;
-    Restangular.one('theme').post('', $scope.theme).then(function () {
-      var stylesheet = $('#theme-stylesheet')[0];
-      stylesheet.href = stylesheet.href.replace(/\?.*|$/, '?' + new Date().getTime());
+    Restangular.one('theme').post('', $scope.theme).then(() => {
+      const stylesheet = $('#theme-stylesheet')[0];
+      stylesheet.href = stylesheet.href.replace(/\?.*|$/, `?${new Date().getTime()}`);
       $rootScope.appName = $scope.theme.name;
     });
   };
-  
+
   // Send an image
   $scope.sendingImage = false;
   $scope.sendImage = function (type, image) {
     // Build the payload
-    var formData = new FormData();
+    const formData = new FormData();
     formData.append('image', image);
 
     // Send the file
-    var done = function() {
-      $scope.$apply(function() {
+    const done = function () {
+      $scope.$apply(() => {
         $scope.sendingImage = false;
         $scope[type] = null;
       });
@@ -54,22 +52,22 @@ angular.module('docs').controller('SettingsConfig', function($scope, $rootScope,
     $scope.sendingImage = true;
     $.ajax({
       type: 'PUT',
-      url: '../api/theme/image/' + type,
+      url: `../api/theme/image/${type}`,
       data: formData,
       cache: false,
       contentType: false,
       processData: false,
-      success: function() {
+      success() {
         done();
       },
-      error: function() {
+      error() {
         done();
-      }
+      },
     });
   };
 
   // Load SMTP config
-  Restangular.one('app/config_smtp').get().then(function (data) {
+  Restangular.one('app/config_smtp').get().then((data) => {
     $scope.smtp = data;
   });
 
@@ -85,7 +83,7 @@ angular.module('docs').controller('SettingsConfig', function($scope, $rootScope,
 
   // Get the webhooks
   $scope.loadWebhooks = function () {
-    Restangular.one('webhook').get().then(function (data) {
+    Restangular.one('webhook').get().then((data) => {
       $scope.webhooks = data.webhooks;
     });
   };
@@ -94,17 +92,17 @@ angular.module('docs').controller('SettingsConfig', function($scope, $rootScope,
 
   // Add a webhook
   $scope.webhook = {
-    event: 'DOCUMENT_CREATED'
+    event: 'DOCUMENT_CREATED',
   };
   $scope.addWebhook = function () {
-    Restangular.one('webhook').put($scope.webhook).then(function () {
+    Restangular.one('webhook').put($scope.webhook).then(() => {
       $scope.loadWebhooks();
-    })
+    });
   };
 
   // Delete a webhook
   $scope.deleteWebhook = function (webhook) {
-    Restangular.one('webhook', webhook.id).remove().then(function () {
+    Restangular.one('webhook', webhook.id).remove().then(() => {
       $scope.loadWebhooks();
     });
   };

@@ -1,9 +1,7 @@
-'use strict';
-
 /**
  * Document controller.
  */
-angular.module('docs').controller('Document', function ($scope, $rootScope, $timeout, $state, Restangular, $q, $filter, $uibModal) {
+angular.module('docs').controller('Document', ($scope, $rootScope, $timeout, $state, Restangular, $q, $filter, $uibModal) => {
   /**
    * Scope variables.
    */
@@ -14,7 +12,7 @@ angular.module('docs').controller('Document', function ($scope, $rootScope, $tim
   $scope.limit = _.isUndefined(localStorage.documentsPageSize) ? '10' : localStorage.documentsPageSize;
   $scope.displayMode = _.isUndefined(localStorage.displayMode) ? 'list' : localStorage.displayMode;
   $scope.search = $state.params.search ? $state.params.search : '';
-  $scope.setSearch = function (search) { $scope.search = search };
+  $scope.setSearch = function (search) { $scope.search = search; };
   $scope.searchOpened = false;
   $scope.searchDropdownAnchor = angular.element(document.querySelector('.search-dropdown-anchor'));
   $scope.paginationShown = true;
@@ -22,27 +20,27 @@ angular.module('docs').controller('Document', function ($scope, $rootScope, $tim
 
   // A timeout promise is used to slow down search requests to the server
   // We keep track of it for cancellation purpose
-  var timeoutPromise;
-  
+  let timeoutPromise;
+
   /**
    * Load new documents page.
    */
   $scope.pageDocuments = function () {
     Restangular.one('document/list')
-        .get({
-          offset: $scope.offset,
-          limit: $scope.limit,
-          sort_column: $scope.sortColumn,
-          asc: $scope.asc,
-          search: $scope.search
-        })
-        .then(function (data) {
-          $scope.documents = data.documents;
-          $scope.totalDocuments = data.total;
-          $scope.suggestions = data.suggestions;
-        });
+      .get({
+        offset: $scope.offset,
+        limit: $scope.limit,
+        sort_column: $scope.sortColumn,
+        asc: $scope.asc,
+        search: $scope.search,
+      })
+      .then((data) => {
+        $scope.documents = data.documents;
+        $scope.totalDocuments = data.total;
+        $scope.suggestions = data.suggestions;
+      });
   };
-  
+
   /**
    * Reload documents.
    */
@@ -51,22 +49,22 @@ angular.module('docs').controller('Document', function ($scope, $rootScope, $tim
     $scope.currentPage = 1;
     $scope.pageDocuments();
   };
-  
+
   /**
    * Watch for current page change.
    */
-  $scope.$watch('currentPage', function (prev, next) {
+  $scope.$watch('currentPage', (prev, next) => {
     if (prev === next) {
       return;
     }
     $scope.offset = ($scope.currentPage - 1) * parseInt($scope.limit);
     $scope.pageDocuments();
   });
-  
+
   /**
    * Watch for search scope change.
    */
-  $scope.$watch('search', function () {
+  $scope.$watch('search', () => {
     if (timeoutPromise) {
       // Cancel previous timeout
       $timeout.cancel(timeoutPromise);
@@ -74,23 +72,23 @@ angular.module('docs').controller('Document', function ($scope, $rootScope, $tim
 
     if ($state.current.name === 'document.default'
         || $state.current.name === 'document.default.search') {
-      $state.go($scope.search === '' ?
-          'document.default' : 'document.default.search', {
-        search: $scope.search
+      $state.go($scope.search === ''
+        ? 'document.default' : 'document.default.search', {
+        search: $scope.search,
       }, {
         location: 'replace',
-        notify: false
+        notify: false,
       });
     }
 
     $scope.extractNavigatedTag();
 
     // Call API later
-    timeoutPromise = $timeout(function () {
+    timeoutPromise = $timeout(() => {
       $scope.loadDocuments();
     }, 200);
   }, true);
-  
+
   /**
    * Sort documents.
    */
@@ -107,7 +105,7 @@ angular.module('docs').controller('Document', function ($scope, $rootScope, $tim
   /**
    * Watch for page size change.
    */
-  $scope.$watch('limit', function (next, prev) {
+  $scope.$watch('limit', (next, prev) => {
     localStorage.documentsPageSize = next;
     if (next === prev) {
       return;
@@ -118,7 +116,7 @@ angular.module('docs').controller('Document', function ($scope, $rootScope, $tim
   /**
    * Watch for display mode change.
    */
-  $scope.$watch('displayMode', function (next) {
+  $scope.$watch('displayMode', (next) => {
     localStorage.displayMode = next;
   });
 
@@ -126,33 +124,31 @@ angular.module('docs').controller('Document', function ($scope, $rootScope, $tim
    * Display a document.
    */
   $scope.viewDocument = function (id) {
-    $state.go('document.view', { id: id });
+    $state.go('document.view', { id });
   };
 
   /**
    * Returns a promise for typeahead user.
    */
-  $scope.getUserTypeahead = function($viewValue) {
-    var deferred = $q.defer();
+  $scope.getUserTypeahead = function ($viewValue) {
+    const deferred = $q.defer();
     Restangular.one('user/list')
       .get({
         search: $viewValue,
         sort_column: 1,
-        asc: true
-      }).then(function(data) {
-      deferred.resolve(_.pluck(_.filter(data.users, function(user) {
-        return user.username.indexOf($viewValue) !== -1;
-      }), 'username'));
-    });
+        asc: true,
+      }).then((data) => {
+        deferred.resolve(_.pluck(_.filter(data.users, (user) => user.username.indexOf($viewValue) !== -1), 'username'));
+      });
     return deferred.promise;
   };
 
   /**
    * Hack to reload the pagination directive after language change.
    */
-  $rootScope.$on('$translateChangeSuccess', function () {
+  $rootScope.$on('$translateChangeSuccess', () => {
     $scope.paginationShown = false;
-    $timeout(function () {
+    $timeout(() => {
       $scope.paginationShown = true;
     });
   });
@@ -161,8 +157,8 @@ angular.module('docs').controller('Document', function ($scope, $rootScope, $tim
    * Open the advanced search panel.
    */
   $scope.openSearch = function () {
-    var opened = $scope.searchOpened;
-    $timeout(function () {
+    const opened = $scope.searchOpened;
+    $timeout(() => {
       $scope.searchOpened = !opened;
     });
   };
@@ -171,41 +167,35 @@ angular.module('docs').controller('Document', function ($scope, $rootScope, $tim
    * Start the advanced search.
    */
   $scope.startSearch = function () {
-    var search = '';
+    let search = '';
     if (!_.isEmpty($scope.advsearch.search_simple)) {
-      var simplesearch = _.map($scope.advsearch.search_simple.split(/\s+/), function (simple) {
-        return 'simple:' + simple
-      });
-      search += simplesearch.join(' ') + ' ';
+      const simplesearch = _.map($scope.advsearch.search_simple.split(/\s+/), (simple) => `simple:${simple}`);
+      search += `${simplesearch.join(' ')} `;
     }
     if (!_.isEmpty($scope.advsearch.search_fulltext)) {
-      var fulltext = _.map($scope.advsearch.search_fulltext.split(/\s+/), function (full) {
-        return 'full:' + full
-      });
-      search += fulltext.join(' ') + ' ';
+      const fulltext = _.map($scope.advsearch.search_fulltext.split(/\s+/), (full) => `full:${full}`);
+      search += `${fulltext.join(' ')} `;
     }
     if (!_.isEmpty($scope.advsearch.creator)) {
-      search += 'by:' + $scope.advsearch.creator + ' ';
+      search += `by:${$scope.advsearch.creator} `;
     }
     if (!_.isEmpty($scope.advsearch.language)) {
-      search += 'lang:' + $scope.advsearch.language + ' ';
+      search += `lang:${$scope.advsearch.language} `;
     }
     if (!_.isUndefined($scope.advsearch.after_date)) {
-      search += 'after:' + $filter('date')($scope.advsearch.after_date, 'yyyy-MM-dd') + ' ';
+      search += `after:${$filter('date')($scope.advsearch.after_date, 'yyyy-MM-dd')} `;
     }
     if (!_.isUndefined($scope.advsearch.before_date)) {
-      search += 'before:' + $filter('date')($scope.advsearch.before_date, 'yyyy-MM-dd') + ' ';
+      search += `before:${$filter('date')($scope.advsearch.before_date, 'yyyy-MM-dd')} `;
     }
     if (!_.isUndefined($scope.advsearch.after_update_date)) {
-      search += 'uafter:' + $filter('date')($scope.advsearch.after_update_date, 'yyyy-MM-dd') + ' ';
+      search += `uafter:${$filter('date')($scope.advsearch.after_update_date, 'yyyy-MM-dd')} `;
     }
     if (!_.isUndefined($scope.advsearch.before_update_date)) {
-      search += 'ubefore:' + $filter('date')($scope.advsearch.before_update_date, 'yyyy-MM-dd') + ' ';
+      search += `ubefore:${$filter('date')($scope.advsearch.before_update_date, 'yyyy-MM-dd')} `;
     }
     if (!_.isEmpty($scope.advsearch.tags)) {
-      search += _.reduce($scope.advsearch.tags, function(s, t) {
-          return s + 'tag:' + t.name + ' ';
-        }, '');
+      search += _.reduce($scope.advsearch.tags, (s, t) => `${s}tag:${t.name} `, '');
     }
     if ($scope.advsearch.shared) {
       search += 'shared:yes ';
@@ -235,11 +225,11 @@ angular.module('docs').controller('Document', function ($scope, $rootScope, $tim
       templateUrl: 'partial/docs/import.html',
       controller: 'ModalImport',
       resolve: {
-        file: function () {
+        file() {
           return file;
-        }
-      }
-    }).result.then(function (data) {
+        },
+      },
+    }).result.then((data) => {
       if (data === null) {
         return;
       }
@@ -253,12 +243,12 @@ angular.module('docs').controller('Document', function ($scope, $rootScope, $tim
   $scope.tags = [];
   $scope.navigatedFilter = { parent: '' };
   $scope.navigatedTag = undefined;
-  $scope.navigationEnabled = _.isUndefined(localStorage.navigationEnabled) ?
-    true : localStorage.navigationEnabled === 'true';
+  $scope.navigationEnabled = _.isUndefined(localStorage.navigationEnabled)
+    ? true : localStorage.navigationEnabled === 'true';
 
-  Restangular.one('tag/list').get().then(function (data) {
+  Restangular.one('tag/list').get().then((data) => {
     $scope.tags = data.tags;
-    _.each($scope.tags, function (tag) {
+    _.each($scope.tags, (tag) => {
       tag.children = _.where($scope.tags, { parent: tag.id });
     });
     $scope.extractNavigatedTag();
@@ -279,7 +269,7 @@ angular.module('docs').controller('Document', function ($scope, $rootScope, $tim
    */
   $scope.navigateToTag = function (tag) {
     if (tag) {
-      $scope.search = 'tag:' + tag.name;
+      $scope.search = `tag:${tag.name}`;
     } else {
       $scope.search = '';
     }
@@ -303,9 +293,9 @@ angular.module('docs').controller('Document', function ($scope, $rootScope, $tim
       return [];
     }
 
-    var nav = [];
+    const nav = [];
     nav.push($scope.navigatedTag);
-    var current = $scope.navigatedTag;
+    let current = $scope.navigatedTag;
     while (current.parent) {
       current = _.findWhere($scope.tags, { id: current.parent });
       if (!current) {
@@ -322,7 +312,7 @@ angular.module('docs').controller('Document', function ($scope, $rootScope, $tim
    */
   $scope.extractNavigatedTag = function () {
     // Find the current tag in the search query
-    var tagFound = /(^| )tag:([^ ]*)/.exec($scope.search);
+    let tagFound = /(^| )tag:([^ ]*)/.exec($scope.search);
     if (tagFound) {
       tagFound = tagFound[2];
       // We search only for exact match
@@ -331,9 +321,9 @@ angular.module('docs').controller('Document', function ($scope, $rootScope, $tim
       $scope.navigatedTag = undefined;
     }
     if ($scope.navigatedTag) {
-      $scope.navigatedFilter = {parent: $scope.navigatedTag.id};
+      $scope.navigatedFilter = { parent: $scope.navigatedTag.id };
     } else {
-      $scope.navigatedFilter = {parent: ''};
+      $scope.navigatedFilter = { parent: '' };
     }
   };
 
@@ -346,7 +336,7 @@ angular.module('docs').controller('Document', function ($scope, $rootScope, $tim
   };
 
   $scope.getTagChildrenShort = function (tag) {
-    var children = tag.children;
+    let { children } = tag;
     if (children.length > 2) {
       children = children.slice(0, 2);
     }
@@ -360,20 +350,20 @@ angular.module('docs').controller('Document', function ($scope, $rootScope, $tim
   $scope.addTagHere = function () {
     $uibModal.open({
       templateUrl: 'partial/docs/document.add.tag.html',
-      controller: 'DocumentModalAddTag'
-    }).result.then(function (tag) {
+      controller: 'DocumentModalAddTag',
+    }).result.then((tag) => {
       if (tag === null) {
         return;
       }
 
       // Create the tag
       tag.parent = $scope.navigatedTag ? $scope.navigatedTag.id : undefined;
-      Restangular.one('tag').put(tag).then(function (data) {
+      Restangular.one('tag').put(tag).then((data) => {
         // Add the new tag to the list
         tag.id = data.id;
         tag.children = [];
         $scope.tags.push(tag);
-      })
+      });
     });
   };
 });
