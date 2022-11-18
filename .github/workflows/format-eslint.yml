@@ -8,15 +8,20 @@ on:
 jobs:
   eslint:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write 
     steps:
       - uses: actions/checkout@v2
         with:
           ref: ${{ github.head_ref }}
 
-      - name: Install all modules
-        working-directory: ./docs-web/src/main/webapp
-        run: npm install
-
-      - name: Execute Eslint
-        working-directory: ./docs-web/src/main/webapp
-        run: npm run lint --fix
+      - name: Execute eslint
+        uses: reviewdog/action-eslint@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          level: error
+          reporter: github-pr-review
+          workdir: ./docs-web/src/main/webapp
+          eslint_flags: ./src
+          
