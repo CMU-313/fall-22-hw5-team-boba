@@ -29,7 +29,7 @@ module.exports = {
     'no-underscore-dangle': 0,
     'no-multi-assign': 0,
     'no-undef': 0,
-    eqeqeq: 0,
+    'eqeqeq': 0,
     'no-bitwise': 0,
     'no-mixed-operators': 0,
     'no-unused-expressions': 0,
