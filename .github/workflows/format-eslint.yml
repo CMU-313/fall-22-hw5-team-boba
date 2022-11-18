@@ -15,6 +15,10 @@ jobs:
 
       - name: Install all modules
         run: npm install
+        with: 
+          workdir: ./docs-web/src/main/webapp
 
       - name: Execute Eslint
         run: npm run lint --fix
+        with: 
+          workdir: ./docs-web/src/main/webapp
