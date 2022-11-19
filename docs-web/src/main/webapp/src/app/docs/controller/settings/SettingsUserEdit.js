@@ -1,21 +1,19 @@
-'use strict';
-
 /**
  * Settings user edition page controller.
  */
-angular.module('docs').controller('SettingsUserEdit', function($scope, $dialog, $state, $stateParams, Restangular, $translate) {
+angular.module('docs').controller('SettingsUserEdit', ($scope, $dialog, $state, $stateParams, Restangular, $translate) => {
   /**
    * Returns true if in edit mode (false in add mode).
    */
   $scope.isEdit = function () {
     return $stateParams.username;
   };
-  
+
   /**
    * In edit mode, load the current user.
    */
   if ($scope.isEdit()) {
-    Restangular.one('user', $stateParams.username).get().then(function (data) {
+    Restangular.one('user', $stateParams.username).get().then((data) => {
       data.storage_quota /= 1000000;
       $scope.user = data;
     });
@@ -27,10 +25,10 @@ angular.module('docs').controller('SettingsUserEdit', function($scope, $dialog, 
    * Update the current user.
    */
   $scope.edit = function () {
-    var promise = null;
-    var user = angular.copy($scope.user);
+    let promise = null;
+    const user = angular.copy($scope.user);
     user.storage_quota *= 1000000;
-    
+
     if ($scope.isEdit()) {
       promise = Restangular
         .one('user', $stateParams.username)
@@ -40,15 +38,15 @@ angular.module('docs').controller('SettingsUserEdit', function($scope, $dialog, 
         .one('user')
         .put(user);
     }
-    
-    promise.then(function () {
+
+    promise.then(() => {
       $scope.loadUsers();
       $state.go('settings.user');
-    }, function (e) {
+    }, (e) => {
       if (e.data.type === 'AlreadyExistingUsername') {
-        var title = $translate.instant('settings.user.edit.edit_user_failed_title');
-        var msg = $translate.instant('settings.user.edit.edit_user_failed_message');
-        var btns = [{result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary'}];
+        const title = $translate.instant('settings.user.edit.edit_user_failed_title');
+        const msg = $translate.instant('settings.user.edit.edit_user_failed_message');
+        const btns = [{ result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' }];
         $dialog.messageBox(title, msg, btns);
       }
     });
@@ -58,23 +56,23 @@ angular.module('docs').controller('SettingsUserEdit', function($scope, $dialog, 
    * Delete the current user.
    */
   $scope.remove = function () {
-    var title = $translate.instant('settings.user.edit.delete_user_title');
-    var msg = $translate.instant('settings.user.edit.delete_user_message');
-    var btns = [
-      { result:'cancel', label: $translate.instant('cancel') },
-      { result:'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' }
+    const title = $translate.instant('settings.user.edit.delete_user_title');
+    const msg = $translate.instant('settings.user.edit.delete_user_message');
+    const btns = [
+      { result: 'cancel', label: $translate.instant('cancel') },
+      { result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' },
     ];
 
-    $dialog.messageBox(title, msg, btns, function (result) {
+    $dialog.messageBox(title, msg, btns, (result) => {
       if (result === 'ok') {
-        Restangular.one('user', $stateParams.username).remove().then(function () {
+        Restangular.one('user', $stateParams.username).remove().then(() => {
           $scope.loadUsers();
           $state.go('settings.user');
-        }, function(e) {
+        }, (e) => {
           if (e.data.type === 'UserUsedInRouteModel') {
-            var title = $translate.instant('settings.user.edit.user_used_title');
-            var msg = $translate.instant('settings.user.edit.user_used_message', { name: e.data.message });
-            var btns = [{result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary'}];
+            const title = $translate.instant('settings.user.edit.user_used_title');
+            const msg = $translate.instant('settings.user.edit.user_used_message', { name: e.data.message });
+            const btns = [{ result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' }];
             $dialog.messageBox(title, msg, btns);
           }
         });
@@ -86,27 +84,27 @@ angular.module('docs').controller('SettingsUserEdit', function($scope, $dialog, 
    * Send a password reset email.
    */
   $scope.passwordReset = function () {
-      Restangular.one('user').post('password_lost', {
-          username: $stateParams.username
-      }).then(function () {
-          var title = $translate.instant('settings.user.edit.password_lost_sent_title');
-          var msg = $translate.instant('settings.user.edit.password_lost_sent_message', { username: $stateParams.username });
-          var btns = [{result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary'}];
-          $dialog.messageBox(title, msg, btns);
-      });
+    Restangular.one('user').post('password_lost', {
+      username: $stateParams.username,
+    }).then(() => {
+      const title = $translate.instant('settings.user.edit.password_lost_sent_title');
+      const msg = $translate.instant('settings.user.edit.password_lost_sent_message', { username: $stateParams.username });
+      const btns = [{ result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' }];
+      $dialog.messageBox(title, msg, btns);
+    });
   };
 
   $scope.disableTotp = function () {
-    var title = $translate.instant('settings.user.edit.disable_totp_title');
-    var msg = $translate.instant('settings.user.edit.disable_totp_message');
-    var btns = [
-      { result:'cancel', label: $translate.instant('cancel') },
-      { result:'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' }
+    const title = $translate.instant('settings.user.edit.disable_totp_title');
+    const msg = $translate.instant('settings.user.edit.disable_totp_message');
+    const btns = [
+      { result: 'cancel', label: $translate.instant('cancel') },
+      { result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' },
     ];
 
-    $dialog.messageBox(title, msg, btns, function (result) {
+    $dialog.messageBox(title, msg, btns, (result) => {
       if (result === 'ok') {
-        Restangular.one('user/' + $stateParams.username + '/disable_totp').post('').then(function() {
+        Restangular.one(`user/${$stateParams.username}/disable_totp`).post('').then(() => {
           $scope.user.totp_enabled = false;
         });
       }

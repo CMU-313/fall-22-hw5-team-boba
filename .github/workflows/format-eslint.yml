@@ -1,0 +1,22 @@
+name: Run ESLint CI
+on:
+  pull_request:
+    branches: 
+      - 'main'
+    tags: [v*]
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Install all modules
+        working-directory: ./docs-web/src/main/webapp
+        run: npm install
+
+      - name: Execute Eslint
+        working-directory: ./docs-web/src/main/webapp
+        run: npm run lint --fix

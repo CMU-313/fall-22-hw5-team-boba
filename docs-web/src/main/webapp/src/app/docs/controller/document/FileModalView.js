@@ -1,27 +1,25 @@
-'use strict';
-
 /**
  * File modal view controller.
  */
-angular.module('docs').controller('FileModalView', function ($uibModalInstance, $scope, $state, $stateParams, $sce, Restangular, $transitions) {
-  var setFile = function (files) {
+angular.module('docs').controller('FileModalView', ($uibModalInstance, $scope, $state, $stateParams, $sce, Restangular, $transitions) => {
+  const setFile = function (files) {
     // Search current file
-    _.each(files, function (value) {
+    _.each(files, (value) => {
       if (value.id === $stateParams.fileId) {
         $scope.file = value;
-        $scope.trustedFileUrl = $sce.trustAsResourceUrl('../api/file/' + $stateParams.fileId + '/data');
+        $scope.trustedFileUrl = $sce.trustAsResourceUrl(`../api/file/${$stateParams.fileId}/data`);
       }
     });
   };
 
   // Load files
-  Restangular.one('file/list').get({ id: $stateParams.id }).then(function (data) {
+  Restangular.one('file/list').get({ id: $stateParams.id }).then((data) => {
     $scope.files = data.files;
     setFile(data.files);
 
     // File not found, maybe it's a version
     if (!$scope.file) {
-      Restangular.one('file/' + $stateParams.fileId + '/versions').get().then(function (data) {
+      Restangular.one(`file/${$stateParams.fileId}/versions`).get().then((data) => {
         setFile(data.files);
       });
     }
@@ -31,8 +29,8 @@ angular.module('docs').controller('FileModalView', function ($uibModalInstance, 
    * Return the next file.
    */
   $scope.nextFile = function () {
-    var next = undefined;
-    _.each($scope.files, function (value, key) {
+    let next;
+    _.each($scope.files, (value, key) => {
       if (value.id === $stateParams.fileId) {
         next = $scope.files[key + 1];
       }
@@ -44,8 +42,8 @@ angular.module('docs').controller('FileModalView', function ($uibModalInstance, 
    * Return the previous file.
    */
   $scope.previousFile = function () {
-    var previous = undefined;
-    _.each($scope.files, function (value, key) {
+    let previous;
+    _.each($scope.files, (value, key) => {
       if (value.id === $stateParams.fileId) {
         previous = $scope.files[key - 1];
       }
@@ -57,7 +55,7 @@ angular.module('docs').controller('FileModalView', function ($uibModalInstance, 
    * Navigate to the next file.
    */
   $scope.goNextFile = function () {
-    var next = $scope.nextFile();
+    const next = $scope.nextFile();
     if (next) {
       $state.go('^.file', { id: $stateParams.id, fileId: next.id });
     }
@@ -67,7 +65,7 @@ angular.module('docs').controller('FileModalView', function ($uibModalInstance, 
    * Navigate to the previous file.
    */
   $scope.goPreviousFile = function () {
-    var previous = $scope.previousFile();
+    const previous = $scope.previousFile();
     if (previous) {
       $state.go('^.file', { id: $stateParams.id, fileId: previous.id });
     }
@@ -77,25 +75,25 @@ angular.module('docs').controller('FileModalView', function ($uibModalInstance, 
    * Open the file in a new window.
    */
   $scope.openFile = function () {
-    window.open('../api/file/' + $stateParams.fileId + '/data');
+    window.open(`../api/file/${$stateParams.fileId}/data`);
   };
 
   /**
    * Open the file content a new window.
    */
   $scope.openFileContent = function () {
-    window.open('../api/file/' + $stateParams.fileId + '/data?size=content');
+    window.open(`../api/file/${$stateParams.fileId}/data?size=content`);
   };
 
   /**
    * Print the file.
    */
   $scope.printFile = function () {
-    var popup = window.open('../api/file/' + $stateParams.fileId + '/data', '_blank');
+    const popup = window.open(`../api/file/${$stateParams.fileId}/data`, '_blank');
     popup.onload = function () {
       popup.print();
       popup.close();
-    }
+    };
   };
 
   /**
@@ -106,7 +104,7 @@ angular.module('docs').controller('FileModalView', function ($uibModalInstance, 
   };
 
   // Close the modal when the user exits this state
-  var off = $transitions.onStart({}, function(transition) {
+  var off = $transitions.onStart({}, (transition) => {
     if (!$uibModalInstance.closed) {
       if (transition.to().name === $state.current.name) {
         $uibModalInstance.close();

@@ -1,64 +1,59 @@
-'use strict';
-
 angular.module('colorpicker.module', [])
-  .factory('helper', function () {
-    return {
-      prepareValues: function(format) {
-        var thisFormat = 'hex';
-        if (format) {
-          thisFormat = format;
-        }
-        return {
-          name: thisFormat,
-          transform: 'to' + (thisFormat === 'hex' ? thisFormat.charAt(0).toUpperCase() + thisFormat.slice(1) : thisFormat.length > 3 ? thisFormat.toUpperCase().slice(0, -1) : thisFormat.toUpperCase())
-        };
-      },
-      updateView: function(element, value) {
-        if (!value) {
-          value = '';
-        }
-        element.val(value);
-        element.data('color', value);
-        element.data('colorpicker').update();
+  .factory('helper', () => ({
+    prepareValues(format) {
+      let thisFormat = 'hex';
+      if (format) {
+        thisFormat = format;
       }
-    }
-  })
-  .directive('colorpicker', ['helper', function(helper) {
+      return {
+        name: thisFormat,
+        transform: `to${thisFormat === 'hex' ? thisFormat.charAt(0).toUpperCase() + thisFormat.slice(1) : thisFormat.length > 3 ? thisFormat.toUpperCase().slice(0, -1) : thisFormat.toUpperCase()}`,
+      };
+    },
+    updateView(element, value) {
+      if (!value) {
+        value = '';
+      }
+      element.val(value);
+      element.data('color', value);
+      element.data('colorpicker').update();
+    },
+  }))
+  .directive('colorpicker', ['helper', function (helper) {
     return {
       require: '?ngModel',
       restrict: 'A',
-      link: function(scope, element, attrs, ngModel) {
+      link(scope, element, attrs, ngModel) {
+        const thisFormat = helper.prepareValues(attrs.colorpicker);
 
-        var thisFormat = helper.prepareValues(attrs.colorpicker);
+        element.colorpicker({ format: thisFormat.name });
 
-        element.colorpicker({format: thisFormat.name});
-
-        element.on('$destroy', function() {
+        element.on('$destroy', () => {
           element.data('colorpicker').picker.remove();
         });
 
-        if(!ngModel) return;
+        if (!ngModel) return;
 
-        element.colorpicker().on('changeColor', function(event) {
+        element.colorpicker().on('changeColor', (event) => {
           element.val(element.data('colorpicker').format(event.color[thisFormat.transform]()));
           scope.$apply(ngModel.$setViewValue(element.data('colorpicker').format(event.color[thisFormat.transform]())));
         });
-        
-        element.colorpicker().on('hide', function(){
+
+        element.colorpicker().on('hide', () => {
           scope.$apply(attrs.onHide);
         });
 
-        element.colorpicker().on('show', function(){
+        element.colorpicker().on('show', () => {
           scope.$apply(attrs.onShow);
         });
 
-        ngModel.$render = function() {
-          helper.updateView(element, ngModel.$viewValue) ;
-        }
-      }
+        ngModel.$render = function () {
+          helper.updateView(element, ngModel.$viewValue);
+        };
+      },
     };
   }])
-  .directive('colorpicker', ['helper', function(helper) {
+  .directive('colorpicker', ['helper', function (helper) {
     return {
       require: '?ngModel',
       restrict: 'E',
@@ -68,30 +63,29 @@ angular.module('colorpicker.module', [])
         componentPicker: '=ngModel',
         inputName: '@inputName',
         inputClass: '@inputClass',
-        colorFormat: '@colorFormat'
+        colorFormat: '@colorFormat',
       },
-      template: '<div class="input-append color" data-color="rgb(0, 0, 0)" data-color-format="">' +
-        '<input type="text" class="{{ inputClass }}" name="{{ inputName }}" ng-model="componentPicker" value="" />' +
-        '<span class="add-on"><i style="background-color: {{componentPicker}}"></i></span>' +
-        '</div>',
+      template: '<div class="input-append color" data-color="rgb(0, 0, 0)" data-color-format="">'
+        + '<input type="text" class="{{ inputClass }}" name="{{ inputName }}" ng-model="componentPicker" value="" />'
+        + '<span class="add-on"><i style="background-color: {{componentPicker}}"></i></span>'
+        + '</div>',
 
-      link: function(scope, element, attrs, ngModel) {
-
-        var thisFormat = helper.prepareValues(attrs.colorFormat);
+      link(scope, element, attrs, ngModel) {
+        const thisFormat = helper.prepareValues(attrs.colorFormat);
 
         element.colorpicker();
-        if(!ngModel) return;
+        if (!ngModel) return;
 
-        var elementInput = angular.element(element.children()[0]);
+        const elementInput = angular.element(element.children()[0]);
 
-        element.colorpicker().on('changeColor', function(event) {
+        element.colorpicker().on('changeColor', (event) => {
           elementInput.val(element.data('colorpicker').format(event.color[thisFormat.transform]()));
           scope.$parent.$apply(ngModel.$setViewValue(element.data('colorpicker').format(event.color[thisFormat.transform]())));
         });
 
-        ngModel.$render = function() {
-          helper.updateView(element, ngModel.$viewValue) ;
-        }
-      }
+        ngModel.$render = function () {
+          helper.updateView(element, ngModel.$viewValue);
+        };
+      },
     };
   }]);

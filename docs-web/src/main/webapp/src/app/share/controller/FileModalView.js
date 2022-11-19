@@ -1,15 +1,13 @@
-'use strict';
-
 /**
  * File modal view controller.
  */
-angular.module('share').controller('FileModalView', function($uibModalInstance, $scope, $state, $stateParams, Restangular, $transitions) {
+angular.module('share').controller('FileModalView', ($uibModalInstance, $scope, $state, $stateParams, Restangular, $transitions) => {
   // Load files
-  Restangular.one('file/list').get({ id: $stateParams.documentId, share: $stateParams.shareId }).then(function(data) {
+  Restangular.one('file/list').get({ id: $stateParams.documentId, share: $stateParams.shareId }).then((data) => {
     $scope.files = data.files;
 
     // Search current file
-    _.each($scope.files, function(value) {
+    _.each($scope.files, (value) => {
       if (value.id === $stateParams.fileId) {
         $scope.file = value;
       }
@@ -19,10 +17,10 @@ angular.module('share').controller('FileModalView', function($uibModalInstance, 
   /**
    * Navigate to the next file.
    */
-  $scope.nextFile = function() {
-    _.each($scope.files, function(value, key) {
+  $scope.nextFile = function () {
+    _.each($scope.files, (value, key) => {
       if (value.id === $stateParams.fileId) {
-        var next = $scope.files[key + 1];
+        const next = $scope.files[key + 1];
         if (next) {
           $state.go('share.file', { documentId: $stateParams.documentId, shareId: $stateParams.shareId, fileId: next.id });
         }
@@ -33,12 +31,12 @@ angular.module('share').controller('FileModalView', function($uibModalInstance, 
   /**
    * Navigate to the previous file.
    */
-  $scope.previousFile = function() {
-    _.each($scope.files, function(value, key) {
+  $scope.previousFile = function () {
+    _.each($scope.files, (value, key) => {
       if (value.id === $stateParams.fileId) {
-        var previous = $scope.files[key - 1];
+        const previous = $scope.files[key - 1];
         if (previous) {
-          $state.go('share.file', { documentId: $stateParams.documentId, shareId: $stateParams.shareId,  fileId: previous.id });
+          $state.go('share.file', { documentId: $stateParams.documentId, shareId: $stateParams.shareId, fileId: previous.id });
         }
       }
     });
@@ -47,19 +45,19 @@ angular.module('share').controller('FileModalView', function($uibModalInstance, 
   /**
    * Open the file in a new window.
    */
-  $scope.openFile = function() {
-    window.open('../api/file/' + $stateParams.fileId + '/data?share=' + $stateParams.shareId);
+  $scope.openFile = function () {
+    window.open(`../api/file/${$stateParams.fileId}/data?share=${$stateParams.shareId}`);
   };
 
   /**
    * Print the file.
    */
-  $scope.printFile = function() {
-    var popup = window.open('../api/file/' + $stateParams.fileId + '/data', '_blank');
+  $scope.printFile = function () {
+    const popup = window.open(`../api/file/${$stateParams.fileId}/data`, '_blank');
     popup.onload = function () {
       popup.print();
       popup.close();
-    }
+    };
   };
 
   /**
@@ -70,7 +68,7 @@ angular.module('share').controller('FileModalView', function($uibModalInstance, 
   };
 
   // Close the modal when the user exits this state
-  var off = $transitions.onStart({}, function(transition) {
+  var off = $transitions.onStart({}, (transition) => {
     if (!$uibModalInstance.closed) {
       if (transition.to().name === $state.current.name) {
         $uibModalInstance.close();

@@ -1,11 +1,9 @@
-'use strict';
-
 /**
  * Group profile controller.
  */
-angular.module('docs').controller('GroupProfile', function($stateParams, Restangular, $scope) {
+angular.module('docs').controller('GroupProfile', ($stateParams, Restangular, $scope) => {
   // Load user
-  Restangular.one('group', $stateParams.name).get().then(function(data) {
+  Restangular.one('group', $stateParams.name).get().then((data) => {
     $scope.group = data;
   });
 });

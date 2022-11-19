@@ -3,8 +3,7 @@
  * (c) 2010-2017 Google, Inc. http://angularjs.org
  * License: MIT
  */
-(function(window, angular) {'use strict';
-
+(function (window, angular) {
   /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
    *     Any commits to this file should be reviewed with security in mind.  *
    *   Changes to this file can potentially create security vulnerabilities. *
@@ -16,16 +15,16 @@
    *     Or gives undesired access to variables likes document or window?    *
    * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-  var $sanitizeMinErr = angular.$$minErr('$sanitize');
-  var bind;
-  var extend;
-  var forEach;
-  var isDefined;
-  var lowercase;
-  var noop;
-  var nodeContains;
-  var htmlParser;
-  var htmlSanitizeWriter;
+  const $sanitizeMinErr = angular.$$minErr('$sanitize');
+  let bind;
+  let extend;
+  let forEach;
+  let isDefined;
+  let lowercase;
+  let noop;
+  let nodeContains;
+  let htmlParser;
+  let htmlSanitizeWriter;
 
   /**
    * @ngdoc module
@@ -145,7 +144,6 @@
    </example>
    */
 
-
   /**
    * @ngdoc provider
    * @name $sanitizeProvider
@@ -155,21 +153,18 @@
    * Creates and configures {@link $sanitize} instance.
    */
   function $SanitizeProvider() {
-    var svgEnabled = false;
+    let svgEnabled = false;
 
-    this.$get = ['$$sanitizeUri', function($$sanitizeUri) {
+    this.$get = ['$$sanitizeUri', function ($$sanitizeUri) {
       if (svgEnabled) {
         extend(validElements, svgElements);
       }
-      return function(html) {
-        var buf = [];
-        htmlParser(html, htmlSanitizeWriter(buf, function(uri, isImage) {
-          return !/^unsafe:/.test($$sanitizeUri(uri, isImage));
-        }));
+      return function (html) {
+        const buf = [];
+        htmlParser(html, htmlSanitizeWriter(buf, (uri, isImage) => !/^unsafe:/.test($$sanitizeUri(uri, isImage))));
         return buf.join('');
       };
     }];
-
 
     /**
      * @ngdoc method
@@ -201,18 +196,17 @@
      * @returns {boolean|ng.$sanitizeProvider} Returns the currently configured value if called
      *    without an argument or self for chaining otherwise.
      */
-    this.enableSvg = function(enableSvg) {
+    this.enableSvg = function (enableSvg) {
       if (isDefined(enableSvg)) {
         svgEnabled = enableSvg;
         return this;
-      } else {
-        return svgEnabled;
       }
+      return svgEnabled;
     };
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////////////////////////////
     // Private stuff
-    //////////////////////////////////////////////////////////////////////////////////////////////////
+    /// ///////////////////////////////////////////////////////////////////////////////////////////////
 
     bind = angular.bind;
     extend = angular.extend;
@@ -224,16 +218,15 @@
     htmlParser = htmlParserImpl;
     htmlSanitizeWriter = htmlSanitizeWriterImpl;
 
-    nodeContains = window.Node.prototype.contains || /** @this */ function(arg) {
+    nodeContains = window.Node.prototype.contains || /** @this */ function (arg) {
       // eslint-disable-next-line no-bitwise
       return !!(this.compareDocumentPosition(arg) & 16);
     };
 
     // Regular Expressions for parsing tags and attributes
-    var SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g,
-      // Match everything outside of normal chars and " (quote character)
-      NON_ALPHANUMERIC_REGEXP = /([^#-~ |!])/g;
-
+    const SURROGATE_PAIR_REGEXP = /[\uD800-\uDBFF][\uDC00-\uDFFF]/g;
+    // Match everything outside of normal chars and " (quote character)
+    const NON_ALPHANUMERIC_REGEXP = /([^#-~ |!])/g;
 
     // Good source of info about elements and attributes
     // http://dev.w3.org/html5/spec/Overview.html#semantics
@@ -241,77 +234,84 @@
 
     // Safe Void Elements - HTML5
     // http://dev.w3.org/html5/spec/Overview.html#void-elements
-    var voidElements = toMap('area,br,col,hr,img,wbr');
+    const voidElements = toMap('area,br,col,hr,img,wbr');
 
     // Elements that you can, intentionally, leave open (and which close themselves)
     // http://dev.w3.org/html5/spec/Overview.html#optional-tags
-    var optionalEndTagBlockElements = toMap('colgroup,dd,dt,li,p,tbody,td,tfoot,th,thead,tr'),
-      optionalEndTagInlineElements = toMap('rp,rt'),
-      optionalEndTagElements = extend({},
-        optionalEndTagInlineElements,
-        optionalEndTagBlockElements);
+    const optionalEndTagBlockElements = toMap('colgroup,dd,dt,li,p,tbody,td,tfoot,th,thead,tr');
+    const optionalEndTagInlineElements = toMap('rp,rt');
+    const optionalEndTagElements = extend(
+      {},
+      optionalEndTagInlineElements,
+      optionalEndTagBlockElements,
+    );
 
     // Safe Block Elements - HTML5
-    var blockElements = extend({}, optionalEndTagBlockElements, toMap('address,article,' +
-      'aside,blockquote,caption,center,del,dir,div,dl,figure,figcaption,footer,h1,h2,h3,h4,h5,' +
-      'h6,header,hgroup,hr,ins,map,menu,nav,ol,pre,section,table,ul'));
+    const blockElements = extend({}, optionalEndTagBlockElements, toMap('address,article,'
+      + 'aside,blockquote,caption,center,del,dir,div,dl,figure,figcaption,footer,h1,h2,h3,h4,h5,'
+      + 'h6,header,hgroup,hr,ins,map,menu,nav,ol,pre,section,table,ul'));
 
     // Inline Elements - HTML5
-    var inlineElements = extend({}, optionalEndTagInlineElements, toMap('a,abbr,acronym,b,' +
-      'bdi,bdo,big,br,cite,code,del,dfn,em,font,i,img,ins,kbd,label,map,mark,q,ruby,rp,rt,s,' +
-      'samp,small,span,strike,strong,sub,sup,time,tt,u,var'));
+    const inlineElements = extend({}, optionalEndTagInlineElements, toMap('a,abbr,acronym,b,'
+      + 'bdi,bdo,big,br,cite,code,del,dfn,em,font,i,img,ins,kbd,label,map,mark,q,ruby,rp,rt,s,'
+      + 'samp,small,span,strike,strong,sub,sup,time,tt,u,var'));
 
     // SVG Elements
     // https://wiki.whatwg.org/wiki/Sanitization_rules#svg_Elements
     // Note: the elements animate,animateColor,animateMotion,animateTransform,set are intentionally omitted.
     // They can potentially allow for arbitrary javascript to be executed. See #11290
-    var svgElements = toMap('circle,defs,desc,ellipse,font-face,font-face-name,font-face-src,g,glyph,' +
-      'hkern,image,linearGradient,line,marker,metadata,missing-glyph,mpath,path,polygon,polyline,' +
-      'radialGradient,rect,stop,svg,switch,text,title,tspan');
+    var svgElements = toMap('circle,defs,desc,ellipse,font-face,font-face-name,font-face-src,g,glyph,'
+      + 'hkern,image,linearGradient,line,marker,metadata,missing-glyph,mpath,path,polygon,polyline,'
+      + 'radialGradient,rect,stop,svg,switch,text,title,tspan');
 
     // Blocked Elements (will be stripped)
-    var blockedElements = toMap('script,style');
+    const blockedElements = toMap('script,style');
 
-    var validElements = extend({},
+    var validElements = extend(
+      {},
       voidElements,
       blockElements,
       inlineElements,
-      optionalEndTagElements);
+      optionalEndTagElements,
+    );
 
-    //Attributes that have href and hence need to be sanitized
-    var uriAttrs = toMap('background,cite,href,longdesc,src,xlink:href');
+    // Attributes that have href and hence need to be sanitized
+    const uriAttrs = toMap('background,cite,href,longdesc,src,xlink:href');
 
-    var htmlAttrs = toMap('abbr,align,alt,axis,bgcolor,border,cellpadding,cellspacing,class,clear,' +
-      'color,cols,colspan,compact,coords,dir,face,headers,height,hreflang,hspace,' +
-      'ismap,lang,language,nohref,nowrap,rel,rev,rows,rowspan,rules,' +
-      'scope,scrolling,shape,size,span,start,summary,tabindex,target,title,type,' +
-      'valign,value,vspace,width');
+    const htmlAttrs = toMap('abbr,align,alt,axis,bgcolor,border,cellpadding,cellspacing,class,clear,'
+      + 'color,cols,colspan,compact,coords,dir,face,headers,height,hreflang,hspace,'
+      + 'ismap,lang,language,nohref,nowrap,rel,rev,rows,rowspan,rules,'
+      + 'scope,scrolling,shape,size,span,start,summary,tabindex,target,title,type,'
+      + 'valign,value,vspace,width');
 
     // SVG attributes (without "id" and "name" attributes)
     // https://wiki.whatwg.org/wiki/Sanitization_rules#svg_Attributes
-    var svgAttrs = toMap('accent-height,accumulate,additive,alphabetic,arabic-form,ascent,' +
-      'baseProfile,bbox,begin,by,calcMode,cap-height,class,color,color-rendering,content,' +
-      'cx,cy,d,dx,dy,descent,display,dur,end,fill,fill-rule,font-family,font-size,font-stretch,' +
-      'font-style,font-variant,font-weight,from,fx,fy,g1,g2,glyph-name,gradientUnits,hanging,' +
-      'height,horiz-adv-x,horiz-origin-x,ideographic,k,keyPoints,keySplines,keyTimes,lang,' +
-      'marker-end,marker-mid,marker-start,markerHeight,markerUnits,markerWidth,mathematical,' +
-      'max,min,offset,opacity,orient,origin,overline-position,overline-thickness,panose-1,' +
-      'path,pathLength,points,preserveAspectRatio,r,refX,refY,repeatCount,repeatDur,' +
-      'requiredExtensions,requiredFeatures,restart,rotate,rx,ry,slope,stemh,stemv,stop-color,' +
-      'stop-opacity,strikethrough-position,strikethrough-thickness,stroke,stroke-dasharray,' +
-      'stroke-dashoffset,stroke-linecap,stroke-linejoin,stroke-miterlimit,stroke-opacity,' +
-      'stroke-width,systemLanguage,target,text-anchor,to,transform,type,u1,u2,underline-position,' +
-      'underline-thickness,unicode,unicode-range,units-per-em,values,version,viewBox,visibility,' +
-      'width,widths,x,x-height,x1,x2,xlink:actuate,xlink:arcrole,xlink:role,xlink:show,xlink:title,' +
-      'xlink:type,xml:base,xml:lang,xml:space,xmlns,xmlns:xlink,y,y1,y2,zoomAndPan', true);
+    const svgAttrs = toMap('accent-height,accumulate,additive,alphabetic,arabic-form,ascent,'
+      + 'baseProfile,bbox,begin,by,calcMode,cap-height,class,color,color-rendering,content,'
+      + 'cx,cy,d,dx,dy,descent,display,dur,end,fill,fill-rule,font-family,font-size,font-stretch,'
+      + 'font-style,font-variant,font-weight,from,fx,fy,g1,g2,glyph-name,gradientUnits,hanging,'
+      + 'height,horiz-adv-x,horiz-origin-x,ideographic,k,keyPoints,keySplines,keyTimes,lang,'
+      + 'marker-end,marker-mid,marker-start,markerHeight,markerUnits,markerWidth,mathematical,'
+      + 'max,min,offset,opacity,orient,origin,overline-position,overline-thickness,panose-1,'
+      + 'path,pathLength,points,preserveAspectRatio,r,refX,refY,repeatCount,repeatDur,'
+      + 'requiredExtensions,requiredFeatures,restart,rotate,rx,ry,slope,stemh,stemv,stop-color,'
+      + 'stop-opacity,strikethrough-position,strikethrough-thickness,stroke,stroke-dasharray,'
+      + 'stroke-dashoffset,stroke-linecap,stroke-linejoin,stroke-miterlimit,stroke-opacity,'
+      + 'stroke-width,systemLanguage,target,text-anchor,to,transform,type,u1,u2,underline-position,'
+      + 'underline-thickness,unicode,unicode-range,units-per-em,values,version,viewBox,visibility,'
+      + 'width,widths,x,x-height,x1,x2,xlink:actuate,xlink:arcrole,xlink:role,xlink:show,xlink:title,'
+      + 'xlink:type,xml:base,xml:lang,xml:space,xmlns,xmlns:xlink,y,y1,y2,zoomAndPan', true);
 
-    var validAttrs = extend({},
+    const validAttrs = extend(
+      {},
       uriAttrs,
       svgAttrs,
-      htmlAttrs);
+      htmlAttrs,
+    );
 
     function toMap(str, lowercaseKeys) {
-      var obj = {}, items = str.split(','), i;
+      const obj = {}; const items = str.split(','); let
+        i;
       for (i = 0; i < items.length; i++) {
         obj[lowercaseKeys ? lowercase(items[i]) : items[i]] = true;
       }
@@ -324,43 +324,41 @@
      * Support: Safari 10.x -> XHR strategy
      * Support: Firefox -> DomParser strategy
      */
-    var getInertBodyElement /* function(html: string): HTMLBodyElement */ = (function(window, document) {
-      var inertDocument;
+    const getInertBodyElement /* function(html: string): HTMLBodyElement */ = (function (window, document) {
+      let inertDocument;
       if (document && document.implementation) {
         inertDocument = document.implementation.createHTMLDocument('inert');
       } else {
         throw $sanitizeMinErr('noinert', 'Can\'t create an inert html document');
       }
-      var inertBodyElement = (inertDocument.documentElement || inertDocument.getDocumentElement()).querySelector('body');
+      const inertBodyElement = (inertDocument.documentElement || inertDocument.getDocumentElement()).querySelector('body');
 
       // Check for the Safari 10.1 bug - which allows JS to run inside the SVG G element
       inertBodyElement.innerHTML = '<svg><g onload="this.parentNode.remove()"></g></svg>';
       if (!inertBodyElement.querySelector('svg')) {
         return getInertBodyElement_XHR;
-      } else {
-        // Check for the Firefox bug - which prevents the inner img JS from being sanitized
-        inertBodyElement.innerHTML = '<svg><p><style><img src="</style><img src=x onerror=alert(1)//">';
-        if (inertBodyElement.querySelector('svg img')) {
-          return getInertBodyElement_DOMParser;
-        } else {
-          return getInertBodyElement_InertDocument;
-        }
       }
+      // Check for the Firefox bug - which prevents the inner img JS from being sanitized
+      inertBodyElement.innerHTML = '<svg><p><style><img src="</style><img src=x onerror=alert(1)//">';
+      if (inertBodyElement.querySelector('svg img')) {
+        return getInertBodyElement_DOMParser;
+      }
+      return getInertBodyElement_InertDocument;
 
       function getInertBodyElement_XHR(html) {
         // We add this dummy element to ensure that the rest of the content is parsed as expected
         // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the `<head>` tag.
-        html = '<remove></remove>' + html;
+        html = `<remove></remove>${html}`;
         try {
           html = encodeURI(html);
         } catch (e) {
           return undefined;
         }
-        var xhr = new window.XMLHttpRequest();
+        const xhr = new window.XMLHttpRequest();
         xhr.responseType = 'document';
-        xhr.open('GET', 'data:text/html;charset=utf-8,' + html, false);
+        xhr.open('GET', `data:text/html;charset=utf-8,${html}`, false);
         xhr.send(null);
-        var body = xhr.response.body;
+        const { body } = xhr.response;
         body.firstChild.remove();
         return body;
       }
@@ -368,9 +366,9 @@
       function getInertBodyElement_DOMParser(html) {
         // We add this dummy element to ensure that the rest of the content is parsed as expected
         // e.g. leading whitespace is maintained and tags like `<meta>` do not get hoisted to the `<head>` tag.
-        html = '<remove></remove>' + html;
+        html = `<remove></remove>${html}`;
         try {
-          var body = new window.DOMParser().parseFromString(html, 'text/html').body;
+          const { body } = new window.DOMParser().parseFromString(html, 'text/html');
           body.firstChild.remove();
           return body;
         } catch (e) {
@@ -389,7 +387,7 @@
 
         return inertBodyElement;
       }
-    })(window, window.document);
+    }(window, window.document));
 
     /**
      * @example
@@ -407,14 +405,14 @@
       if (html === null || html === undefined) {
         html = '';
       } else if (typeof html !== 'string') {
-        html = '' + html;
+        html = `${html}`;
       }
 
-      var inertBodyElement = getInertBodyElement(html);
+      let inertBodyElement = getInertBodyElement(html);
       if (!inertBodyElement) return '';
 
-      //mXSS protection
-      var mXSSAttempts = 5;
+      // mXSS protection
+      let mXSSAttempts = 5;
       do {
         if (mXSSAttempts === 0) {
           throw $sanitizeMinErr('uinput', 'Failed to sanitize html because the input is unstable');
@@ -426,7 +424,7 @@
         inertBodyElement = getInertBodyElement(html);
       } while (html !== inertBodyElement.innerHTML);
 
-      var node = inertBodyElement.firstChild;
+      let node = inertBodyElement.firstChild;
       while (node) {
         switch (node.nodeType) {
           case 1: // ELEMENT_NODE
@@ -463,14 +461,13 @@
     }
 
     function attrToMap(attrs) {
-      var map = {};
-      for (var i = 0, ii = attrs.length; i < ii; i++) {
-        var attr = attrs[i];
+      const map = {};
+      for (let i = 0, ii = attrs.length; i < ii; i++) {
+        const attr = attrs[i];
         map[attr.name] = attr.value;
       }
       return map;
     }
-
 
     /**
      * Escapes all potentially dangerous characters, so that the
@@ -480,18 +477,16 @@
      * @returns {string} escaped text
      */
     function encodeEntities(value) {
-      return value.
-      replace(/&/g, '&amp;').
-      replace(SURROGATE_PAIR_REGEXP, function(value) {
-        var hi = value.charCodeAt(0);
-        var low = value.charCodeAt(1);
-        return '&#' + (((hi - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000) + ';';
-      }).
-      replace(NON_ALPHANUMERIC_REGEXP, function(value) {
-        return '&#' + value.charCodeAt(0) + ';';
-      }).
-      replace(/</g, '&lt;').
-      replace(/>/g, '&gt;');
+      return value
+        .replace(/&/g, '&amp;')
+        .replace(SURROGATE_PAIR_REGEXP, (value) => {
+          const hi = value.charCodeAt(0);
+          const low = value.charCodeAt(1);
+          return `&#${((hi - 0xD800) * 0x400) + (low - 0xDC00) + 0x10000};`;
+        })
+        .replace(NON_ALPHANUMERIC_REGEXP, (value) => `&#${value.charCodeAt(0)};`)
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
     }
 
     /**
@@ -505,10 +500,10 @@
    * }
      */
     function htmlSanitizeWriterImpl(buf, uriValidator) {
-      var ignoreCurrentElement = false;
-      var out = bind(buf, buf.push);
+      let ignoreCurrentElement = false;
+      const out = bind(buf, buf.push);
       return {
-        start: function(tag, attrs) {
+        start(tag, attrs) {
           tag = lowercase(tag);
           if (!ignoreCurrentElement && blockedElements[tag]) {
             ignoreCurrentElement = tag;
@@ -516,11 +511,11 @@
           if (!ignoreCurrentElement && validElements[tag] === true) {
             out('<');
             out(tag);
-            forEach(attrs, function(value, key) {
-              var lkey = lowercase(key);
-              var isImage = (tag === 'img' && lkey === 'src') || (lkey === 'background');
-              if (validAttrs[lkey] === true &&
-                (uriAttrs[lkey] !== true || uriValidator(value, isImage))) {
+            forEach(attrs, (value, key) => {
+              const lkey = lowercase(key);
+              const isImage = (tag === 'img' && lkey === 'src') || (lkey === 'background');
+              if (validAttrs[lkey] === true
+                && (uriAttrs[lkey] !== true || uriValidator(value, isImage))) {
                 out(' ');
                 out(key);
                 out('="');
@@ -531,7 +526,7 @@
             out('>');
           }
         },
-        end: function(tag) {
+        end(tag) {
           tag = lowercase(tag);
           if (!ignoreCurrentElement && validElements[tag] === true && voidElements[tag] !== true) {
             out('</');
@@ -543,14 +538,13 @@
             ignoreCurrentElement = false;
           }
         },
-        chars: function(chars) {
+        chars(chars) {
           if (!ignoreCurrentElement) {
             out(encodeEntities(chars));
           }
-        }
+        },
       };
     }
-
 
     /**
      * When IE9-11 comes across an unknown namespaced attribute e.g. 'xlink:foo' it adds 'xmlns:ns1' attribute to declare
@@ -562,10 +556,10 @@
     function stripCustomNsAttrs(node) {
       while (node) {
         if (node.nodeType === window.Node.ELEMENT_NODE) {
-          var attrs = node.attributes;
-          for (var i = 0, l = attrs.length; i < l; i++) {
-            var attrNode = attrs[i];
-            var attrName = attrNode.name.toLowerCase();
+          const attrs = node.attributes;
+          for (let i = 0, l = attrs.length; i < l; i++) {
+            const attrNode = attrs[i];
+            const attrName = attrNode.name.toLowerCase();
             if (attrName === 'xmlns:ns1' || attrName.lastIndexOf('ns1:', 0) === 0) {
               node.removeAttributeNode(attrNode);
               i--;
@@ -574,7 +568,7 @@
           }
         }
 
-        var nextNode = node.firstChild;
+        const nextNode = node.firstChild;
         if (nextNode) {
           stripCustomNsAttrs(nextNode);
         }
@@ -585,7 +579,7 @@
 
     function getNonDescendant(propName, node) {
       // An element is clobbered if its `propName` property points to one of its descendants
-      var nextNode = node[propName];
+      const nextNode = node[propName];
       if (nextNode && nodeContains.call(node, nextNode)) {
         throw $sanitizeMinErr('elclob', 'Failed to sanitize html because the element is clobbered: {0}', node.outerHTML || node.outerText);
       }
@@ -594,14 +588,13 @@
   }
 
   function sanitizeText(chars) {
-    var buf = [];
-    var writer = htmlSanitizeWriter(buf, noop);
+    const buf = [];
+    const writer = htmlSanitizeWriter(buf, noop);
     writer.chars(chars);
     return buf.join('');
   }
 
-
-// define ngSanitize module and register $sanitize service
+  // define ngSanitize module and register $sanitize service
   angular.module('ngSanitize', [])
     .provider('$sanitize', $SanitizeProvider)
     .info({ angularVersion: '1.6.6' });
@@ -733,31 +726,29 @@
    </file>
    </example>
    */
-  angular.module('ngSanitize').filter('linky', ['$sanitize', function($sanitize) {
-    var LINKY_URL_REGEXP =
-        /((ftp|https?):\/\/|(www\.)|(mailto:)?[A-Za-z0-9._%+-]+@)\S*[^\s.;,(){}<>"\u201d\u2019]/i,
-      MAILTO_REGEXP = /^mailto:/i;
+  angular.module('ngSanitize').filter('linky', ['$sanitize', function ($sanitize) {
+    const LINKY_URL_REGEXP = /((ftp|https?):\/\/|(www\.)|(mailto:)?[A-Za-z0-9._%+-]+@)\S*[^\s.;,(){}<>"\u201d\u2019]/i;
+    const MAILTO_REGEXP = /^mailto:/i;
 
-    var linkyMinErr = angular.$$minErr('linky');
-    var isDefined = angular.isDefined;
-    var isFunction = angular.isFunction;
-    var isObject = angular.isObject;
-    var isString = angular.isString;
+    const linkyMinErr = angular.$$minErr('linky');
+    const { isDefined } = angular;
+    const { isFunction } = angular;
+    const { isObject } = angular;
+    const { isString } = angular;
 
-    return function(text, target, attributes) {
+    return function (text, target, attributes) {
       if (text == null || text === '') return text;
       if (!isString(text)) throw linkyMinErr('notstring', 'Expected string but received: {0}', text);
 
-      var attributesFn =
-        isFunction(attributes) ? attributes :
-          isObject(attributes) ? function getAttributesObject() {return attributes;} :
-            function getEmptyAttributesObject() {return {};};
+      const attributesFn = isFunction(attributes) ? attributes
+        : isObject(attributes) ? function getAttributesObject() { return attributes; }
+          : function getEmptyAttributesObject() { return {}; };
 
-      var match;
-      var raw = text;
-      var html = [];
-      var url;
-      var i;
+      let match;
+      let raw = text;
+      const html = [];
+      let url;
+      let i;
       while ((match = raw.match(LINKY_URL_REGEXP))) {
         // We can not end in these as they are sometimes found at the end of the sentence
         url = match[0];
@@ -781,26 +772,29 @@
       }
 
       function addLink(url, text) {
-        var key, linkAttributes = attributesFn(url);
+        let key; const
+          linkAttributes = attributesFn(url);
         html.push('<a ');
 
         for (key in linkAttributes) {
-          html.push(key + '="' + linkAttributes[key] + '" ');
+          html.push(`${key}="${linkAttributes[key]}" `);
         }
 
         if (isDefined(target) && !('target' in linkAttributes)) {
-          html.push('target="',
+          html.push(
+            'target="',
             target,
-            '" ');
+            '" ',
+          );
         }
-        html.push('href="',
+        html.push(
+          'href="',
           url.replace(/"/g, '&quot;'),
-          '">');
+          '">',
+        );
         addText(text);
         html.push('</a>');
       }
     };
   }]);
-
-
-})(window, window.angular);
+}(window, window.angular));

@@ -1,49 +1,47 @@
-'use strict';
-
 /**
  * Login controller.
  */
-angular.module('docs').controller('Login', function(Restangular, $scope, $rootScope, $state, $stateParams, $dialog, User, $translate, $uibModal) {
+angular.module('docs').controller('Login', (Restangular, $scope, $rootScope, $state, $stateParams, $dialog, User, $translate, $uibModal) => {
   $scope.codeRequired = false;
 
   // Get the app configuration
-  Restangular.one('app').get().then(function(data) {
+  Restangular.one('app').get().then((data) => {
     $rootScope.app = data;
   });
 
   // Login as guest
-  $scope.loginAsGuest = function() {
+  $scope.loginAsGuest = function () {
     $scope.user = {
       username: 'guest',
-      password: ''
+      password: '',
     };
     $scope.login();
   };
-  
+
   // Login
-  $scope.login = function() {
-    User.login($scope.user).then(function() {
-      User.userInfo(true).then(function(data) {
+  $scope.login = function () {
+    User.login($scope.user).then(() => {
+      User.userInfo(true).then((data) => {
         $rootScope.userInfo = data;
       });
 
-      if($stateParams.redirectState !== undefined && $stateParams.redirectParams !== undefined) {
+      if ($stateParams.redirectState !== undefined && $stateParams.redirectParams !== undefined) {
         $state.go($stateParams.redirectState, JSON.parse($stateParams.redirectParams))
-          .catch(function() {
+          .catch(() => {
             $state.go('document.default');
           });
       } else {
         $state.go('document.default');
       }
-    }, function(data) {
+    }, (data) => {
       if (data.data.type === 'ValidationCodeRequired') {
         // A TOTP validation code is required to login
         $scope.codeRequired = true;
       } else {
         // Login truly failed
-        var title = $translate.instant('login.login_failed_title');
-        var msg = $translate.instant('login.login_failed_message');
-        var btns = [{result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary'}];
+        const title = $translate.instant('login.login_failed_title');
+        const msg = $translate.instant('login.login_failed_message');
+        const btns = [{ result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' }];
         $dialog.messageBox(title, msg, btns);
       }
     });
@@ -53,24 +51,24 @@ angular.module('docs').controller('Login', function(Restangular, $scope, $rootSc
   $scope.openPasswordLost = function () {
     $uibModal.open({
       templateUrl: 'partial/docs/passwordlost.html',
-      controller: 'ModalPasswordLost'
-    }).result.then(function (username) {
+      controller: 'ModalPasswordLost',
+    }).result.then((username) => {
       if (username === null) {
         return;
       }
 
       // Send a password lost email
       Restangular.one('user').post('password_lost', {
-        username: username
-      }).then(function () {
-        var title = $translate.instant('login.password_lost_sent_title');
-        var msg = $translate.instant('login.password_lost_sent_message', { username: username });
-        var btns = [{result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary'}];
+        username,
+      }).then(() => {
+        const title = $translate.instant('login.password_lost_sent_title');
+        const msg = $translate.instant('login.password_lost_sent_message', { username });
+        const btns = [{ result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' }];
         $dialog.messageBox(title, msg, btns);
-      }, function () {
-        var title = $translate.instant('login.password_lost_error_title');
-        var msg = $translate.instant('login.password_lost_error_message');
-        var btns = [{result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary'}];
+      }, () => {
+        const title = $translate.instant('login.password_lost_error_title');
+        const msg = $translate.instant('login.password_lost_error_message');
+        const btns = [{ result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' }];
         $dialog.messageBox(title, msg, btns);
       });
     });

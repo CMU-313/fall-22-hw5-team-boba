@@ -1,21 +1,19 @@
-'use strict';
-
 /**
  * Settings group edition page controller.
  */
-angular.module('docs').controller('SettingsGroupEdit', function($scope, $dialog, $state, $stateParams, Restangular, $q, $translate) {
+angular.module('docs').controller('SettingsGroupEdit', ($scope, $dialog, $state, $stateParams, Restangular, $q, $translate) => {
   /**
    * Returns true if in edit mode (false in add mode).
    */
-  $scope.isEdit = function() {
+  $scope.isEdit = function () {
     return $stateParams.name;
   };
-  
+
   /**
    * In edit mode, load the current group.
    */
   if ($scope.isEdit()) {
-    Restangular.one('group', $stateParams.name).get().then(function(data) {
+    Restangular.one('group', $stateParams.name).get().then((data) => {
       $scope.group = data;
     });
   }
@@ -23,9 +21,9 @@ angular.module('docs').controller('SettingsGroupEdit', function($scope, $dialog,
   /**
    * Update the current group.
    */
-  $scope.edit = function() {
-    var promise = null;
-    var group = angular.copy($scope.group);
+  $scope.edit = function () {
+    let promise = null;
+    const group = angular.copy($scope.group);
 
     if ($scope.isEdit()) {
       promise = Restangular
@@ -36,8 +34,8 @@ angular.module('docs').controller('SettingsGroupEdit', function($scope, $dialog,
         .one('group')
         .put(group);
     }
-    
-    promise.then(function() {
+
+    promise.then(() => {
       $scope.loadGroups();
       if ($scope.isEdit()) {
         $state.go('settings.group');
@@ -45,16 +43,16 @@ angular.module('docs').controller('SettingsGroupEdit', function($scope, $dialog,
         // Go to edit this group to add members
         $state.go('settings.group.edit', { name: group.name });
       }
-    }, function (e) {
+    }, (e) => {
       if (e.data.type === 'GroupAlreadyExists') {
         var title = $translate.instant('settings.group.edit.edit_group_failed_title');
         var msg = $translate.instant('settings.group.edit.edit_group_failed_message');
-        var btns = [{result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary'}];
+        var btns = [{ result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' }];
         $dialog.messageBox(title, msg, btns);
       } else if (e.data.type === 'GroupUsedInRouteModel') {
         var title = $translate.instant('settings.group.edit.group_used_title');
         var msg = $translate.instant('settings.group.edit.group_used_message', { name: e.data.message });
-        var btns = [{result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary'}];
+        var btns = [{ result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' }];
         $dialog.messageBox(title, msg, btns);
       }
     });
@@ -63,24 +61,24 @@ angular.module('docs').controller('SettingsGroupEdit', function($scope, $dialog,
   /**
    * Delete the current group.
    */
-  $scope.remove = function() {
-    var title = $translate.instant('settings.group.edit.delete_group_title');
-    var msg = $translate.instant('settings.group.edit.delete_group_message');
-    var btns = [
-      { result:'cancel', label: $translate.instant('cancel') },
-      { result:'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' }
+  $scope.remove = function () {
+    const title = $translate.instant('settings.group.edit.delete_group_title');
+    const msg = $translate.instant('settings.group.edit.delete_group_message');
+    const btns = [
+      { result: 'cancel', label: $translate.instant('cancel') },
+      { result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' },
     ];
 
-    $dialog.messageBox(title, msg, btns, function(result) {
+    $dialog.messageBox(title, msg, btns, (result) => {
       if (result === 'ok') {
-        Restangular.one('group', $stateParams.name).remove().then(function() {
+        Restangular.one('group', $stateParams.name).remove().then(() => {
           $scope.loadGroups();
           $state.go('settings.group');
-        }, function(e) {
+        }, (e) => {
           if (e.data.type === 'GroupUsedInRouteModel') {
-            var title = $translate.instant('settings.group.edit.group_used_title');
-            var msg = $translate.instant('settings.group.edit.group_used_message', { name: e.data.message });
-            var btns = [{result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary'}];
+            const title = $translate.instant('settings.group.edit.group_used_title');
+            const msg = $translate.instant('settings.group.edit.group_used_message', { name: e.data.message });
+            const btns = [{ result: 'ok', label: $translate.instant('ok'), cssClass: 'btn-primary' }];
             $dialog.messageBox(title, msg, btns);
           }
         });
@@ -91,46 +89,42 @@ angular.module('docs').controller('SettingsGroupEdit', function($scope, $dialog,
   /**
    * Returns a promise for typeahead group.
    */
-  $scope.getGroupTypeahead = function($viewValue) {
-    var deferred = $q.defer();
+  $scope.getGroupTypeahead = function ($viewValue) {
+    const deferred = $q.defer();
     Restangular.one('group')
-        .get({
-          sort_column: 1,
-          asc: true
-        }).then(function(data) {
-      deferred.resolve(_.pluck(_.filter(data.groups, function(group) {
-        return group.name.indexOf($viewValue) !== -1;
-      }), 'name'));
-    });
+      .get({
+        sort_column: 1,
+        asc: true,
+      }).then((data) => {
+        deferred.resolve(_.pluck(_.filter(data.groups, (group) => group.name.indexOf($viewValue) !== -1), 'name'));
+      });
     return deferred.promise;
   };
 
   /**
    * Returns a promise for typeahead user.
    */
-  $scope.getUserTypeahead = function($viewValue) {
-    var deferred = $q.defer();
+  $scope.getUserTypeahead = function ($viewValue) {
+    const deferred = $q.defer();
     Restangular.one('user/list')
-        .get({
-          search: $viewValue,
-          sort_column: 1,
-          asc: true
-        }).then(function(data) {
-      deferred.resolve(_.pluck(_.filter(data.users, function(user) {
-        return user.username.indexOf($viewValue) !== -1;
-      }), 'username'));
-    });
+      .get({
+        search: $viewValue,
+        sort_column: 1,
+        asc: true,
+      }).then((data) => {
+        deferred.resolve(_.pluck(_.filter(data.users, (user) => user.username.indexOf($viewValue) !== -1), 'username'));
+      });
     return deferred.promise;
   };
 
   /**
    * Add a new member.
    */
-  $scope.addMember = function(member) {
+  $scope.addMember = function (member) {
     $scope.member = '';
-    Restangular.one('group/' + $stateParams.name).put({
-      username: member
-    }).then(function() {
+    Restangular.one(`group/${$stateParams.name}`).put({
+      username: member,
+    }).then(() => {
       if ($scope.group.members.indexOf(member) === -1) {
         $scope.group.members.push(member);
       }
@@ -140,8 +134,8 @@ angular.module('docs').controller('SettingsGroupEdit', function($scope, $dialog,
   /**
    * Remove a member.
    */
-  $scope.removeMember = function(member) {
-    Restangular.one('group/' + $stateParams.name, member).remove().then(function() {
+  $scope.removeMember = function (member) {
+    Restangular.one(`group/${$stateParams.name}`, member).remove().then(() => {
       $scope.group.members.splice($scope.group.members.indexOf(member), 1);
     });
   };

@@ -3,7 +3,7 @@
  * @version v1.6.1 - 2017-01-06 * @link https://github.com/mgonto/restangular
  * @author Martin Gontovnikas <martin@gon.to>
  * @license MIT License, http://www.opensource.org/licenses/MIT
- */(function(root, factory) {
+ */(function (root, factory) {
   /* global define, require */
   // https://github.com/umdjs/umd/blob/master/templates/returnExports.js
   if (typeof define === 'function' && define.amd) {
@@ -14,43 +14,42 @@
     // No global export, Restangular will register itself as Angular.js module
     factory(root._, root.angular);
   }
-}(this, function(_, angular) {
+}(this, (_, angular) => {
+  const restangular = angular.module('restangular', []);
 
-  var restangular = angular.module('restangular', []);
-
-  restangular.provider('Restangular', function() {
+  restangular.provider('Restangular', function () {
     // Configuration
-    var Configurer = {};
-    Configurer.init = function(object, config) {
+    const Configurer = {};
+    Configurer.init = function (object, config) {
       object.configuration = config;
 
       /**
        * Those are HTTP safe methods for which there is no need to pass any data with the request.
        */
-      var safeMethods = ['get', 'head', 'options', 'trace', 'getlist'];
-      config.isSafe = function(operation) {
+      const safeMethods = ['get', 'head', 'options', 'trace', 'getlist'];
+      config.isSafe = function (operation) {
         return _.includes(safeMethods, operation.toLowerCase());
       };
 
-      var absolutePattern = /^https?:\/\//i;
-      config.isAbsoluteUrl = function(string) {
-        return _.isUndefined(config.absoluteUrl) || _.isNull(config.absoluteUrl) ?
-          string && absolutePattern.test(string) :
-          config.absoluteUrl;
+      const absolutePattern = /^https?:\/\//i;
+      config.isAbsoluteUrl = function (string) {
+        return _.isUndefined(config.absoluteUrl) || _.isNull(config.absoluteUrl)
+          ? string && absolutePattern.test(string)
+          : config.absoluteUrl;
       };
 
       config.absoluteUrl = _.isUndefined(config.absoluteUrl) ? true : config.absoluteUrl;
-      object.setSelfLinkAbsoluteUrl = function(value) {
+      object.setSelfLinkAbsoluteUrl = function (value) {
         config.absoluteUrl = value;
       };
       /**
        * This is the BaseURL to be used with Restangular
        */
       config.baseUrl = _.isUndefined(config.baseUrl) ? '' : config.baseUrl;
-      object.setBaseUrl = function(newBaseUrl) {
-        config.baseUrl = /\/$/.test(newBaseUrl) ?
-          newBaseUrl.substring(0, newBaseUrl.length - 1) :
-          newBaseUrl;
+      object.setBaseUrl = function (newBaseUrl) {
+        config.baseUrl = /\/$/.test(newBaseUrl)
+          ? newBaseUrl.substring(0, newBaseUrl.length - 1)
+          : newBaseUrl;
         return this;
       };
 
@@ -58,35 +57,35 @@
        * Sets the extra fields to keep from the parents
        */
       config.extraFields = config.extraFields || [];
-      object.setExtraFields = function(newExtraFields) {
+      object.setExtraFields = function (newExtraFields) {
         config.extraFields = newExtraFields;
         return this;
       };
 
       /**
        * Some default $http parameter to be used in EVERY call
-       **/
+       * */
       config.defaultHttpFields = config.defaultHttpFields || {};
-      object.setDefaultHttpFields = function(values) {
+      object.setDefaultHttpFields = function (values) {
         config.defaultHttpFields = values;
         return this;
       };
 
       /**
        * Always return plain data, no restangularized object
-       **/
+       * */
       config.plainByDefault = config.plainByDefault || false;
-      object.setPlainByDefault = function(value) {
-        config.plainByDefault = value === true ? true : false;
+      object.setPlainByDefault = function (value) {
+        config.plainByDefault = value === true;
         return this;
       };
 
-      config.withHttpValues = function(httpLocalConfig, obj) {
+      config.withHttpValues = function (httpLocalConfig, obj) {
         return _.defaults(obj, httpLocalConfig, config.defaultHttpFields);
       };
 
       config.encodeIds = _.isUndefined(config.encodeIds) ? true : config.encodeIds;
-      object.setEncodeIds = function(encode) {
+      object.setEncodeIds = function (encode) {
         config.encodeIds = encode;
       };
 
@@ -95,12 +94,12 @@
         post: {},
         put: {},
         remove: {},
-        common: {}
+        common: {},
       };
 
-      object.setDefaultRequestParams = function(param1, param2) {
-        var methods = [],
-          params = param2 || param1;
+      object.setDefaultRequestParams = function (param1, param2) {
+        let methods = [];
+        const params = param2 || param1;
         if (!_.isUndefined(param2)) {
           if (_.isArray(param1)) {
             methods = param1;
@@ -111,7 +110,7 @@
           methods.push('common');
         }
 
-        _.each(methods, function(method) {
+        _.each(methods, (method) => {
           config.defaultRequestParams[method] = params;
         });
         return this;
@@ -120,7 +119,7 @@
       object.requestParams = config.defaultRequestParams;
 
       config.defaultHeaders = config.defaultHeaders || {};
-      object.setDefaultHeaders = function(headers) {
+      object.setDefaultHeaders = function (headers) {
         config.defaultHeaders = headers;
         object.defaultHeaders = config.defaultHeaders;
         return this;
@@ -130,10 +129,10 @@
 
       /**
        * Method overriders will set which methods are sent via POST with an X-HTTP-Method-Override
-       **/
+       * */
       config.methodOverriders = config.methodOverriders || [];
-      object.setMethodOverriders = function(values) {
-        var overriders = _.extend([], values);
+      object.setMethodOverriders = function (values) {
+        const overriders = _.extend([], values);
         if (config.isOverridenMethod('delete', overriders)) {
           overriders.push('remove');
         }
@@ -142,22 +141,20 @@
       };
 
       config.jsonp = _.isUndefined(config.jsonp) ? false : config.jsonp;
-      object.setJsonp = function(active) {
+      object.setJsonp = function (active) {
         config.jsonp = active;
       };
 
-      config.isOverridenMethod = function(method, values) {
-        var search = values || config.methodOverriders;
-        return !_.isUndefined(_.find(search, function(one) {
-          return one.toLowerCase() === method.toLowerCase();
-        }));
+      config.isOverridenMethod = function (method, values) {
+        const search = values || config.methodOverriders;
+        return !_.isUndefined(_.find(search, (one) => one.toLowerCase() === method.toLowerCase()));
       };
 
       /**
        * Sets the URL creator type. For now, only Path is created. In the future we'll have queryParams
-       **/
+       * */
       config.urlCreator = config.urlCreator || 'path';
-      object.setUrlCreator = function(name) {
+      object.setUrlCreator = function (name) {
         if (!_.has(config.urlCreatorFactory, name)) {
           throw new Error('URL Path selected isn\'t valid');
         }
@@ -226,22 +223,21 @@
         singleOne: 'singleOne',
         plain: 'plain',
         save: 'save',
-        restangularized: 'restangularized'
+        restangularized: 'restangularized',
       };
-      object.setRestangularFields = function(resFields) {
-        config.restangularFields =
-          _.extend(config.restangularFields, resFields);
+      object.setRestangularFields = function (resFields) {
+        config.restangularFields = _.extend(config.restangularFields, resFields);
         return this;
       };
 
-      config.isRestangularized = function(obj) {
+      config.isRestangularized = function (obj) {
         return !!obj[config.restangularFields.restangularized];
       };
 
-      config.setFieldToElem = function(field, elem, value) {
-        var properties = field.split('.');
-        var idValue = elem;
-        _.each(_.initial(properties), function(prop) {
+      config.setFieldToElem = function (field, elem, value) {
+        const properties = field.split('.');
+        let idValue = elem;
+        _.each(_.initial(properties), (prop) => {
           idValue[prop] = {};
           idValue = idValue[prop];
         });
@@ -249,10 +245,10 @@
         return this;
       };
 
-      config.getFieldFromElem = function(field, elem) {
-        var properties = field.split('.');
-        var idValue = elem;
-        _.each(properties, function(prop) {
+      config.getFieldFromElem = function (field, elem) {
+        const properties = field.split('.');
+        let idValue = elem;
+        _.each(properties, (prop) => {
           if (idValue) {
             idValue = idValue[prop];
           }
@@ -260,37 +256,37 @@
         return angular.copy(idValue);
       };
 
-      config.setIdToElem = function(elem, id /*, route */ ) {
+      config.setIdToElem = function (elem, id /* , route */) {
         config.setFieldToElem(config.restangularFields.id, elem, id);
         return this;
       };
 
-      config.getIdFromElem = function(elem) {
+      config.getIdFromElem = function (elem) {
         return config.getFieldFromElem(config.restangularFields.id, elem);
       };
 
-      config.isValidId = function(elemId) {
-        return '' !== elemId && !_.isUndefined(elemId) && !_.isNull(elemId);
+      config.isValidId = function (elemId) {
+        return elemId !== '' && !_.isUndefined(elemId) && !_.isNull(elemId);
       };
 
-      config.setUrlToElem = function(elem, url /*, route */ ) {
+      config.setUrlToElem = function (elem, url /* , route */) {
         config.setFieldToElem(config.restangularFields.selfLink, elem, url);
         return this;
       };
 
-      config.getUrlFromElem = function(elem) {
+      config.getUrlFromElem = function (elem) {
         return config.getFieldFromElem(config.restangularFields.selfLink, elem);
       };
 
       config.useCannonicalId = _.isUndefined(config.useCannonicalId) ? false : config.useCannonicalId;
-      object.setUseCannonicalId = function(value) {
+      object.setUseCannonicalId = function (value) {
         config.useCannonicalId = value;
         return this;
       };
 
-      config.getCannonicalIdFromElem = function(elem) {
-        var cannonicalId = elem[config.restangularFields.cannonicalId];
-        var actualId = config.isValidId(cannonicalId) ? cannonicalId : config.getIdFromElem(elem);
+      config.getCannonicalIdFromElem = function (elem) {
+        const cannonicalId = elem[config.restangularFields.cannonicalId];
+        const actualId = config.isValidId(cannonicalId) ? cannonicalId : config.getIdFromElem(elem);
         return actualId;
       };
 
@@ -304,28 +300,34 @@
 
       config.responseInterceptors = config.responseInterceptors || [];
 
-      config.defaultResponseInterceptor = function(data /*, operation, what, url, response, deferred */ ) {
+      config.defaultResponseInterceptor = function (data /* , operation, what, url, response, deferred */) {
         return data;
       };
 
-      config.responseExtractor = function(data, operation, what, url, response, deferred) {
-        var interceptors = angular.copy(config.responseInterceptors);
+      config.responseExtractor = function (data, operation, what, url, response, deferred) {
+        const interceptors = angular.copy(config.responseInterceptors);
         interceptors.push(config.defaultResponseInterceptor);
-        var theData = data;
-        _.each(interceptors, function(interceptor) {
-          theData = interceptor(theData, operation,
-            what, url, response, deferred);
+        let theData = data;
+        _.each(interceptors, (interceptor) => {
+          theData = interceptor(
+            theData,
+            operation,
+            what,
+            url,
+            response,
+            deferred,
+          );
         });
         return theData;
       };
 
-      object.addResponseInterceptor = function(extractor) {
+      object.addResponseInterceptor = function (extractor) {
         config.responseInterceptors.push(extractor);
         return this;
       };
 
       config.errorInterceptors = config.errorInterceptors || [];
-      object.addErrorInterceptor = function(interceptor) {
+      object.addErrorInterceptor = function (interceptor) {
         config.errorInterceptors.push(interceptor);
         return this;
       };
@@ -338,60 +340,62 @@
        * Response interceptor is called just before resolving promises.
        */
 
-
       /**
        * Request interceptor is called before sending an object to the server.
        */
       config.requestInterceptors = config.requestInterceptors || [];
 
-      config.defaultInterceptor = function(element, operation, path, url, headers, params, httpConfig) {
+      config.defaultInterceptor = function (element, operation, path, url, headers, params, httpConfig) {
         return {
-          element: element,
-          headers: headers,
-          params: params,
-          httpConfig: httpConfig
+          element,
+          headers,
+          params,
+          httpConfig,
         };
       };
 
-      config.fullRequestInterceptor = function(element, operation, path, url, headers, params, httpConfig) {
-        var interceptors = angular.copy(config.requestInterceptors);
-        var defaultRequest = config.defaultInterceptor(element, operation, path, url, headers, params, httpConfig);
-        return _.reduce(interceptors, function(request, interceptor) {
-          return _.extend(request, interceptor(request.element, operation,
-            path, url, request.headers, request.params, request.httpConfig));
-        }, defaultRequest);
+      config.fullRequestInterceptor = function (element, operation, path, url, headers, params, httpConfig) {
+        const interceptors = angular.copy(config.requestInterceptors);
+        const defaultRequest = config.defaultInterceptor(element, operation, path, url, headers, params, httpConfig);
+        return _.reduce(interceptors, (request, interceptor) => _.extend(request, interceptor(
+          request.element,
+          operation,
+          path,
+          url,
+          request.headers,
+          request.params,
+          request.httpConfig,
+        )), defaultRequest);
       };
 
-      object.addRequestInterceptor = function(interceptor) {
-        config.requestInterceptors.push(function(elem, operation, path, url, headers, params, httpConfig) {
-          return {
-            headers: headers,
-            params: params,
-            element: interceptor(elem, operation, path, url),
-            httpConfig: httpConfig
-          };
-        });
+      object.addRequestInterceptor = function (interceptor) {
+        config.requestInterceptors.push((elem, operation, path, url, headers, params, httpConfig) => ({
+          headers,
+          params,
+          element: interceptor(elem, operation, path, url),
+          httpConfig,
+        }));
         return this;
       };
 
       object.setRequestInterceptor = object.addRequestInterceptor;
 
-      object.addFullRequestInterceptor = function(interceptor) {
+      object.addFullRequestInterceptor = function (interceptor) {
         config.requestInterceptors.push(interceptor);
         return this;
       };
 
       object.setFullRequestInterceptor = object.addFullRequestInterceptor;
 
-      config.onBeforeElemRestangularized = config.onBeforeElemRestangularized || function(elem) {
+      config.onBeforeElemRestangularized = config.onBeforeElemRestangularized || function (elem) {
         return elem;
       };
-      object.setOnBeforeElemRestangularized = function(post) {
+      object.setOnBeforeElemRestangularized = function (post) {
         config.onBeforeElemRestangularized = post;
         return this;
       };
 
-      object.setRestangularizePromiseInterceptor = function(interceptor) {
+      object.setRestangularizePromiseInterceptor = function (interceptor) {
         config.restangularizePromiseInterceptor = interceptor;
         return this;
       };
@@ -403,24 +407,24 @@
        * and the name of the model
        *
        */
-      config.onElemRestangularized = config.onElemRestangularized || function(elem) {
+      config.onElemRestangularized = config.onElemRestangularized || function (elem) {
         return elem;
       };
-      object.setOnElemRestangularized = function(post) {
+      object.setOnElemRestangularized = function (post) {
         config.onElemRestangularized = post;
         return this;
       };
 
-      config.shouldSaveParent = config.shouldSaveParent || function() {
+      config.shouldSaveParent = config.shouldSaveParent || function () {
         return true;
       };
-      object.setParentless = function(values) {
+      object.setParentless = function (values) {
         if (_.isArray(values)) {
-          config.shouldSaveParent = function(route) {
+          config.shouldSaveParent = function (route) {
             return !_.includes(values, route);
           };
         } else if (_.isBoolean(values)) {
-          config.shouldSaveParent = function() {
+          config.shouldSaveParent = function () {
             return !values;
           };
         }
@@ -437,7 +441,7 @@
        * By default, the suffix is null
        */
       config.suffix = _.isUndefined(config.suffix) ? null : config.suffix;
-      object.setRequestSuffix = function(newSuffix) {
+      object.setRequestSuffix = function (newSuffix) {
         config.suffix = newSuffix;
         return this;
       };
@@ -447,9 +451,9 @@
        */
       config.transformers = config.transformers || {};
       config.matchTransformers = config.matchTransformers || [];
-      object.addElementTransformer = function(type, secondArg, thirdArg) {
-        var isCollection = null;
-        var transformer = null;
+      object.addElementTransformer = function (type, secondArg, thirdArg) {
+        let isCollection = null;
+        let transformer = null;
         if (arguments.length === 2) {
           transformer = secondArg;
         } else {
@@ -457,7 +461,7 @@
           isCollection = secondArg;
         }
 
-        var transformerFn = function(coll, elem) {
+        const transformerFn = function (coll, elem) {
           if (_.isNull(isCollection) || (coll === isCollection)) {
             return transformer(elem);
           }
@@ -467,7 +471,7 @@
         if (_.isRegExp(type)) {
           config.matchTransformers.push({
             regexp: type,
-            transformer: transformerFn
+            transformer: transformerFn,
           });
         } else {
           if (!config.transformers[type]) {
@@ -479,70 +483,69 @@
         return object;
       };
 
-      object.extendCollection = function(route, fn) {
+      object.extendCollection = function (route, fn) {
         return object.addElementTransformer(route, true, fn);
       };
 
-      object.extendModel = function(route, fn) {
+      object.extendModel = function (route, fn) {
         return object.addElementTransformer(route, false, fn);
       };
 
-      config.transformElem = function(elem, isCollection, route, Restangular, force) {
+      config.transformElem = function (elem, isCollection, route, Restangular, force) {
         if (!force && !config.transformLocalElements && !elem[config.restangularFields.fromServer]) {
           return elem;
         }
 
-        var changedElem = elem;
+        let changedElem = elem;
 
-        var matchTransformers = config.matchTransformers;
+        const { matchTransformers } = config;
         if (matchTransformers) {
-          _.each(matchTransformers, function(transformer) {
+          _.each(matchTransformers, (transformer) => {
             if (transformer.regexp.test(route)) {
               changedElem = transformer.transformer(isCollection, changedElem);
             }
           });
         }
 
-        var typeTransformers = config.transformers[route];
+        const typeTransformers = config.transformers[route];
         if (typeTransformers) {
-          _.each(typeTransformers, function(transformer) {
+          _.each(typeTransformers, (transformer) => {
             changedElem = transformer(isCollection, changedElem);
           });
         }
         return config.onElemRestangularized(changedElem, isCollection, route, Restangular);
       };
 
-      config.transformLocalElements = _.isUndefined(config.transformLocalElements) ?
-        false :
-        config.transformLocalElements;
+      config.transformLocalElements = _.isUndefined(config.transformLocalElements)
+        ? false
+        : config.transformLocalElements;
 
-      object.setTransformOnlyServerElements = function(active) {
+      object.setTransformOnlyServerElements = function (active) {
         config.transformLocalElements = !active;
       };
 
       config.fullResponse = _.isUndefined(config.fullResponse) ? false : config.fullResponse;
-      object.setFullResponse = function(full) {
+      object.setFullResponse = function (full) {
         config.fullResponse = full;
         return this;
       };
 
-
-      //Internal values and functions
+      // Internal values and functions
       config.urlCreatorFactory = {};
 
       /**
        * Base URL Creator. Base prototype for everything related to it
-       **/
+       * */
 
-      var BaseCreator = function() {};
+      const BaseCreator = function () {};
 
-      BaseCreator.prototype.setConfig = function(config) {
+      BaseCreator.prototype.setConfig = function (config) {
         this.config = config;
         return this;
       };
 
-      BaseCreator.prototype.parentsArray = function(current) {
-        var parents = [];
+      BaseCreator.prototype.parentsArray = function (current) {
+        const parents = [];
         while (current) {
           parents.push(current);
           current = current[this.config.restangularFields.parentResource];
@@ -551,9 +554,9 @@
       };
 
       function RestangularResource(config, $http, url, configurer) {
-        var resource = {};
-        _.each(_.keys(configurer), function(key) {
-          var value = configurer[key];
+        const resource = {};
+        _.each(_.keys(configurer), (key) => {
+          const value = configurer[key];
 
           // Add default parameters
           value.params = _.extend({}, value.params, config.defaultRequestParams[value.method.toLowerCase()]);
@@ -563,32 +566,27 @@
           }
 
           if (config.isSafe(value.method)) {
-
-            resource[key] = function() {
+            resource[key] = function () {
               return $http(_.extend(value, {
-                url: url
+                url,
               }));
             };
-
           } else {
-
-            resource[key] = function(data) {
+            resource[key] = function (data) {
               return $http(_.extend(value, {
-                url: url,
-                data: data
+                url,
+                data,
               }));
             };
-
           }
         });
 
         return resource;
       }
 
-      BaseCreator.prototype.resource = function(current, $http, localHttpConfig, callHeaders, callParams, what, etag, operation) {
-
-        var params = _.defaults(callParams || {}, this.config.defaultRequestParams.common);
-        var headers = _.defaults(callHeaders || {}, this.config.defaultHeaders);
+      BaseCreator.prototype.resource = function (current, $http, localHttpConfig, callHeaders, callParams, what, etag, operation) {
+        const params = _.defaults(callParams || {}, this.config.defaultRequestParams.common);
+        const headers = _.defaults(callHeaders || {}, this.config.defaultHeaders);
 
         if (etag) {
           if (!config.isSafe(operation)) {
@@ -598,10 +596,10 @@
           }
         }
 
-        var url = this.base(current);
+        let url = this.base(current);
 
         if (what || what === 0) {
-          var add = '';
+          let add = '';
           if (!/\/$/.test(url)) {
             add += '/';
           }
@@ -609,9 +607,9 @@
           url += add;
         }
 
-        if (this.config.suffix &&
-          url.indexOf(this.config.suffix, url.length - this.config.suffix.length) === -1 &&
-          !this.config.getUrlFromElem(current)) {
+        if (this.config.suffix
+          && url.indexOf(this.config.suffix, url.length - this.config.suffix.length) === -1
+          && !this.config.getUrlFromElem(current)) {
           url += this.config.suffix;
         }
 
@@ -620,63 +618,63 @@
         return RestangularResource(this.config, $http, url, {
           getList: this.config.withHttpValues(localHttpConfig, {
             method: 'GET',
-            params: params,
-            headers: headers
+            params,
+            headers,
           }),
 
           get: this.config.withHttpValues(localHttpConfig, {
             method: 'GET',
-            params: params,
-            headers: headers
+            params,
+            headers,
           }),
 
           jsonp: this.config.withHttpValues(localHttpConfig, {
             method: 'jsonp',
-            params: params,
-            headers: headers
+            params,
+            headers,
           }),
 
           put: this.config.withHttpValues(localHttpConfig, {
             method: 'PUT',
-            params: params,
-            headers: headers
+            params,
+            headers,
           }),
 
           post: this.config.withHttpValues(localHttpConfig, {
             method: 'POST',
-            params: params,
-            headers: headers
+            params,
+            headers,
           }),
 
           remove: this.config.withHttpValues(localHttpConfig, {
             method: 'DELETE',
-            params: params,
-            headers: headers
+            params,
+            headers,
           }),
 
           head: this.config.withHttpValues(localHttpConfig, {
             method: 'HEAD',
-            params: params,
-            headers: headers
+            params,
+            headers,
           }),
 
           trace: this.config.withHttpValues(localHttpConfig, {
             method: 'TRACE',
-            params: params,
-            headers: headers
+            params,
+            headers,
           }),
 
           options: this.config.withHttpValues(localHttpConfig, {
             method: 'OPTIONS',
-            params: params,
-            headers: headers
+            params,
+            headers,
           }),
 
           patch: this.config.withHttpValues(localHttpConfig, {
             method: 'PATCH',
-            params: params,
-            headers: headers
-          })
+            params,
+            headers,
+          }),
         });
       };
 
@@ -684,38 +682,37 @@
        * This is the Path URL creator. It uses Path to show Hierarchy in the Rest API.
        * This means that if you have an Account that then has a set of Buildings, a URL to a building
        * would be /accounts/123/buildings/456
-       **/
-      var Path = function() {};
+       * */
+      const Path = function () {};
 
       Path.prototype = new BaseCreator();
 
-      Path.prototype.normalizeUrl = function(url) {
-        var parts = /((?:http[s]?:)?\/\/)?(.*)?/.exec(url);
+      Path.prototype.normalizeUrl = function (url) {
+        const parts = /((?:http[s]?:)?\/\/)?(.*)?/.exec(url);
         parts[2] = parts[2].replace(/[\\\/]+/g, '/');
         return (typeof parts[1] !== 'undefined') ? parts[1] + parts[2] : parts[2];
       };
 
-      Path.prototype.base = function(current) {
-        var __this = this;
-        return _.reduce(this.parentsArray(current), function(acum, elem) {
-          var elemUrl;
-          var elemSelfLink = __this.config.getUrlFromElem(elem);
+      Path.prototype.base = function (current) {
+        const __this = this;
+        return _.reduce(this.parentsArray(current), (acum, elem) => {
+          let elemUrl;
+          const elemSelfLink = __this.config.getUrlFromElem(elem);
           if (elemSelfLink) {
             if (__this.config.isAbsoluteUrl(elemSelfLink)) {
               return elemSelfLink;
-            } else {
-              elemUrl = elemSelfLink;
             }
+            elemUrl = elemSelfLink;
           } else {
             elemUrl = elem[__this.config.restangularFields.route];
 
             if (elem[__this.config.restangularFields.restangularCollection]) {
-              var ids = elem[__this.config.restangularFields.ids];
+              const ids = elem[__this.config.restangularFields.ids];
               if (ids) {
-                elemUrl += '/' + ids.join(',');
+                elemUrl += `/${ids.join(',')}`;
               }
             } else {
-              var elemId;
+              let elemId;
               if (__this.config.useCannonicalId) {
                 elemId = __this.config.getCannonicalIdFromElem(elem);
               } else {
@@ -723,29 +720,26 @@
               }
 
               if (config.isValidId(elemId) && !elem.singleOne) {
-                elemUrl += '/' + (__this.config.encodeIds ? encodeURIComponent(elemId) : elemId);
+                elemUrl += `/${__this.config.encodeIds ? encodeURIComponent(elemId) : elemId}`;
               }
             }
           }
-          acum = acum.replace(/\/$/, '') + '/' + elemUrl;
+          acum = `${acum.replace(/\/$/, '')}/${elemUrl}`;
           return __this.normalizeUrl(acum);
-
         }, this.config.baseUrl);
       };
 
-
-
-      Path.prototype.fetchUrl = function(current, what) {
-        var baseUrl = this.base(current);
+      Path.prototype.fetchUrl = function (current, what) {
+        let baseUrl = this.base(current);
         if (what) {
-          baseUrl += '/' + what;
+          baseUrl += `/${what}`;
         }
         return baseUrl;
       };
 
-      Path.prototype.fetchRequestedUrl = function(current, what) {
-        var url = this.fetchUrl(current, what);
-        var params = current[config.restangularFields.reqParams];
+      Path.prototype.fetchRequestedUrl = function (current, what) {
+        const url = this.fetchUrl(current, what);
+        const params = current[config.restangularFields.reqParams];
 
         // From here on and until the end of fetchRequestedUrl,
         // the code has been kindly borrowed from angular.js
@@ -754,8 +748,8 @@
         //   serialization of parameters would need to be identical
         //   to the one done by angular for cache keys to match.
         function sortedKeys(obj) {
-          var keys = [];
-          for (var key in obj) {
+          const keys = [];
+          for (const key in obj) {
             if (obj.hasOwnProperty(key)) {
               keys.push(key);
             }
@@ -764,28 +758,28 @@
         }
 
         function forEachSorted(obj, iterator, context) {
-          var keys = sortedKeys(obj);
-          for (var i = 0; i < keys.length; i++) {
+          const keys = sortedKeys(obj);
+          for (let i = 0; i < keys.length; i++) {
             iterator.call(context, obj[keys[i]], keys[i]);
           }
           return keys;
         }
 
         function encodeUriQuery(val, pctEncodeSpaces) {
-          return encodeURIComponent(val).
-          replace(/%40/gi, '@').
-          replace(/%3A/gi, ':').
-          replace(/%24/g, '$').
-          replace(/%2C/gi, ',').
-          replace(/%20/g, (pctEncodeSpaces ? '%20' : '+'));
+          return encodeURIComponent(val)
+            .replace(/%40/gi, '@')
+            .replace(/%3A/gi, ':')
+            .replace(/%24/g, '$')
+            .replace(/%2C/gi, ',')
+            .replace(/%20/g, (pctEncodeSpaces ? '%20' : '+'));
         }
 
         if (!params) {
           return url + (this.config.suffix || '');
         }
 
-        var parts = [];
-        forEachSorted(params, function(value, key) {
+        const parts = [];
+        forEachSorted(params, (value, key) => {
           if (value === null || value === undefined) {
             return;
           }
@@ -793,11 +787,11 @@
             value = [value];
           }
 
-          angular.forEach(value, function(v) {
+          angular.forEach(value, (v) => {
             if (angular.isObject(v)) {
               v = angular.toJson(v);
             }
-            parts.push(encodeUriQuery(key) + '=' + encodeUriQuery(v));
+            parts.push(`${encodeUriQuery(key)}=${encodeUriQuery(v)}`);
           });
         });
 
@@ -807,18 +801,15 @@
       config.urlCreatorFactory.path = Path;
     };
 
-    var globalConfiguration = {};
+    const globalConfiguration = {};
 
     Configurer.init(this, globalConfiguration);
 
-
-
-    this.$get = ['$http', '$q', function($http, $q) {
-
+    this.$get = ['$http', '$q', function ($http, $q) {
       function createServiceForConfiguration(config) {
-        var service = {};
+        const service = {};
 
-        var urlHandler = new config.urlCreatorFactory[config.urlCreator]();
+        const urlHandler = new config.urlCreatorFactory[config.urlCreator]();
         urlHandler.setConfig(config);
 
         function restangularizeBase(parent, elem, route, reqParams, fromServer) {
@@ -844,14 +835,14 @@
           elem[config.restangularFields.fromServer] = !!fromServer;
 
           if (parent && config.shouldSaveParent(route)) {
-            var parentId = config.getIdFromElem(parent);
-            var parentUrl = config.getUrlFromElem(parent);
+            const parentId = config.getIdFromElem(parent);
+            const parentUrl = config.getUrlFromElem(parent);
 
-            var restangularFieldsForParent = _.union(
+            const restangularFieldsForParent = _.union(
               _.values(_.pick(config.restangularFields, ['route', 'singleOne', 'parentResource'])),
-              config.extraFields
+              config.extraFields,
             );
-            var parentResource = _.pick(parent, restangularFieldsForParent);
+            const parentResource = _.pick(parent, restangularFieldsForParent);
 
             if (config.isValidId(parentId)) {
               config.setIdToElem(parentResource, parentId, route);
@@ -868,7 +859,7 @@
         }
 
         function one(parent, route, id, singleOne) {
-          var error;
+          let error;
           if (_.isNumber(route) || _.isNumber(parent)) {
             error = 'You\'re creating a Restangular entity with the number ';
             error += 'instead of the route or the parent. For example, you can\'t call .one(12).';
@@ -879,19 +870,18 @@
             error += 'For example you can\'t call .one(). Please check if your arguments are valid.';
             throw new Error(error);
           }
-          var elem = {};
+          const elem = {};
           config.setIdToElem(elem, id, route);
           config.setFieldToElem(config.restangularFields.singleOne, elem, singleOne);
           return restangularizeElem(parent, elem, route, false);
         }
 
-
         function all(parent, route) {
           return restangularizeCollection(parent, [], route, false);
         }
 
-        function several(parent, route /*, ids */ ) {
-          var collection = [];
+        function several(parent, route /* , ids */) {
+          const collection = [];
           collection[config.restangularFields.ids] = Array.prototype.splice.call(arguments, 2);
           return restangularizeCollection(parent, collection, route, false);
         }
@@ -900,17 +890,16 @@
           if (!route) {
             throw new Error('Route is mandatory when creating new Restangular objects.');
           }
-          var elem = {};
+          const elem = {};
           config.setUrlToElem(elem, url, route);
           return restangularizeElem(parent, elem, route, false);
         }
-
 
         function allUrl(parent, route, url) {
           if (!route) {
             throw new Error('Route is mandatory when creating new Restangular objects.');
           }
-          var elem = {};
+          const elem = {};
           config.setUrlToElem(elem, url, route);
           return restangularizeCollection(parent, elem, route, false);
         }
@@ -930,12 +919,12 @@
         }
 
         function promiseCall(method) {
-          var deferred = $q.defer();
-          var callArgs = arguments;
-          var filledValue = {};
-          this.then(function(val) {
-            var params = Array.prototype.slice.call(callArgs, 1);
-            var func = val[method];
+          const deferred = $q.defer();
+          const callArgs = arguments;
+          let filledValue = {};
+          this.then((val) => {
+            const params = Array.prototype.slice.call(callArgs, 1);
+            const func = val[method];
             func.apply(val, params);
             filledValue = val;
             deferred.resolve(val);
@@ -944,9 +933,9 @@
         }
 
         function promiseGet(what) {
-          var deferred = $q.defer();
-          var filledValue = {};
-          this.then(function(val) {
+          const deferred = $q.defer();
+          let filledValue = {};
+          this.then((val) => {
             filledValue = val[what];
             deferred.resolve(filledValue);
           });
@@ -959,41 +948,38 @@
           // Trigger the full response interceptor.
           if (config.fullResponse) {
             return deferred.resolve(_.extend(response, {
-              data: data
+              data,
             }));
-          } else {
-            deferred.resolve(data);
           }
+          deferred.resolve(data);
         }
-
 
         // Elements
         function stripRestangular(elem) {
           if (_.isArray(elem)) {
-            var array = [];
-            _.each(elem, function(value) {
+            const array = [];
+            _.each(elem, (value) => {
               array.push(config.isRestangularized(value) ? stripRestangular(value) : value);
             });
             return array;
-          } else {
-            return _.omit(elem, _.values(_.omit(config.restangularFields, 'id')));
           }
+          return _.omit(elem, _.values(_.omit(config.restangularFields, 'id')));
         }
 
         function addCustomOperation(elem) {
           elem[config.restangularFields.customOperation] = _.bind(customFunction, elem);
-          var requestMethods = {
+          const requestMethods = {
             get: customFunction,
-            delete: customFunction
+            delete: customFunction,
           };
-          _.each(['put', 'patch', 'post'], function(name) {
-            requestMethods[name] = function(operation, elem, path, params, headers) {
+          _.each(['put', 'patch', 'post'], (name) => {
+            requestMethods[name] = function (operation, elem, path, params, headers) {
               return _.bind(customFunction, this)(operation, path, params, headers, elem);
             };
           });
-          _.each(requestMethods, function(requestFunc, name) {
-            var callOperation = name === 'delete' ? 'remove' : name;
-            _.each(['do', 'custom'], function(alias) {
+          _.each(requestMethods, (requestFunc, name) => {
+            const callOperation = name === 'delete' ? 'remove' : name;
+            _.each(['do', 'custom'], (alias) => {
               elem[alias + name.toUpperCase()] = _.bind(requestFunc, elem, callOperation);
             });
           });
@@ -1002,7 +988,7 @@
         }
 
         function copyRestangularizedElement(element) {
-          var copiedElement = angular.copy(element);
+          const copiedElement = angular.copy(element);
 
           // check if we're dealing with a collection (i.e. an array)
           // and restangularize the element using the proper restangularizer,
@@ -1013,7 +999,7 @@
               copiedElement,
               element[config.restangularFields.route],
               element[config.restangularFields.fromServer],
-              element[config.restangularFields.reqParams]
+              element[config.restangularFields.reqParams],
             );
           }
 
@@ -1024,21 +1010,21 @@
             element[config.restangularFields.route],
             element[config.restangularFields.fromServer],
             element[config.restangularFields.restangularCollection],
-            element[config.restangularFields.reqParams]
+            element[config.restangularFields.reqParams],
           );
         }
 
         function restangularizeElem(parent, element, route, fromServer, collection, reqParams) {
-          var elem = config.onBeforeElemRestangularized(element, false, route);
+          const elem = config.onBeforeElemRestangularized(element, false, route);
 
-          var localElem = restangularizeBase(parent, elem, route, reqParams, fromServer);
+          const localElem = restangularizeBase(parent, elem, route, reqParams, fromServer);
 
           if (config.useCannonicalId) {
             localElem[config.restangularFields.cannonicalId] = config.getIdFromElem(localElem);
           }
 
           if (collection) {
-            localElem[config.restangularFields.getParentList] = function() {
+            localElem[config.restangularFields.getParentList] = function () {
               return collection;
             };
           }
@@ -1060,9 +1046,9 @@
         }
 
         function restangularizeCollection(parent, element, route, fromServer, reqParams) {
-          var elem = config.onBeforeElemRestangularized(element, true, route);
+          const elem = config.onBeforeElemRestangularized(element, true, route);
 
-          var localElem = restangularizeBase(parent, elem, route, reqParams, fromServer);
+          const localElem = restangularizeBase(parent, elem, route, reqParams, fromServer);
           localElem[config.restangularFields.restangularCollection] = true;
           localElem[config.restangularFields.post] = _.bind(postFunction, localElem, null);
           localElem[config.restangularFields.remove] = _.bind(deleteFunction, localElem);
@@ -1079,8 +1065,8 @@
         }
 
         function restangularizeCollectionAndElements(parent, element, route, fromServer) {
-          var collection = restangularizeCollection(parent, element, route, fromServer);
-          _.each(collection, function(elem) {
+          const collection = restangularizeCollection(parent, element, route, fromServer);
+          _.each(collection, (elem) => {
             if (elem) {
               restangularizeElem(parent, elem, route, fromServer);
             }
@@ -1093,17 +1079,17 @@
         }
 
         function putElementFunction(idx, params, headers) {
-          var __this = this;
-          var elemToPut = this[idx];
-          var deferred = $q.defer();
-          var filledArray = [];
+          const __this = this;
+          const elemToPut = this[idx];
+          const deferred = $q.defer();
+          let filledArray = [];
           filledArray = config.transformElem(filledArray, true, elemToPut[config.restangularFields.route], service);
-          elemToPut.put(params, headers).then(function(serverElem) {
-            var newArray = copyRestangularizedElement(__this);
+          elemToPut.put(params, headers).then((serverElem) => {
+            const newArray = copyRestangularizedElement(__this);
             newArray[idx] = serverElem;
             filledArray = newArray;
             deferred.resolve(newArray);
-          }, function(response) {
+          }, (response) => {
             deferred.reject(response);
           });
 
@@ -1111,58 +1097,68 @@
         }
 
         function parseResponse(resData, operation, route, fetchUrl, response, deferred) {
-          var data = config.responseExtractor(resData, operation, route, fetchUrl, response, deferred);
-          var etag = response.headers('ETag');
+          const data = config.responseExtractor(resData, operation, route, fetchUrl, response, deferred);
+          const etag = response.headers('ETag');
           if (data && etag) {
             data[config.restangularFields.etag] = etag;
           }
           return data;
         }
 
-
         function fetchFunction(what, reqParams, headers) {
-          var __this = this;
-          var deferred = $q.defer();
-          var operation = 'getList';
-          var url = urlHandler.fetchUrl(this, what);
-          var whatFetched = what || __this[config.restangularFields.route];
+          const __this = this;
+          const deferred = $q.defer();
+          const operation = 'getList';
+          const url = urlHandler.fetchUrl(this, what);
+          const whatFetched = what || __this[config.restangularFields.route];
 
-          var request = config.fullRequestInterceptor(null, operation,
-            whatFetched, url, headers || {}, reqParams || {}, this[config.restangularFields.httpConfig] || {});
+          const request = config.fullRequestInterceptor(
+            null,
+            operation,
+            whatFetched,
+            url,
+            headers || {},
+            reqParams || {},
+            this[config.restangularFields.httpConfig] || {},
+          );
 
-          var filledArray = [];
+          let filledArray = [];
           filledArray = config.transformElem(filledArray, true, whatFetched, service);
 
-          var method = 'getList';
+          let method = 'getList';
 
           if (config.jsonp) {
             method = 'jsonp';
           }
 
-          var okCallback = function(response) {
-            var resData = response.data;
-            var fullParams = response.config.params;
-            var data = parseResponse(resData, operation, whatFetched, url, response, deferred);
+          const okCallback = function (response) {
+            const resData = response.data;
+            const fullParams = response.config.params;
+            let data = parseResponse(resData, operation, whatFetched, url, response, deferred);
 
             // support empty response for getList() calls (some APIs respond with 204 and empty body)
-            if (_.isUndefined(data) || '' === data) {
+            if (_.isUndefined(data) || data === '') {
               data = [];
             }
             if (!_.isArray(data)) {
               throw new Error('Response for getList SHOULD be an array and not an object or something else');
             }
 
-            if (true === config.plainByDefault) {
+            if (config.plainByDefault === true) {
               return resolvePromise(deferred, response, data, filledArray);
             }
 
-            var processedData = _.map(data, function(elem) {
+            let processedData = _.map(data, (elem) => {
               if (!__this[config.restangularFields.restangularCollection]) {
                 return restangularizeElem(__this, elem, what, true, data);
-              } else {
-                return restangularizeElem(__this[config.restangularFields.parentResource],
-                  elem, __this[config.restangularFields.route], true, data);
               }
+              return restangularizeElem(
+                __this[config.restangularFields.parentResource],
+                elem,
+                __this[config.restangularFields.route],
+                true,
+                data,
+              );
             });
 
             processedData = _.extend(data, processedData);
@@ -1176,9 +1172,9 @@
                   processedData,
                   what,
                   true,
-                  fullParams
+                  fullParams,
                 ),
-                filledArray
+                filledArray,
               );
             } else {
               resolvePromise(
@@ -1189,20 +1185,26 @@
                   processedData,
                   __this[config.restangularFields.route],
                   true,
-                  fullParams
+                  fullParams,
                 ),
-                filledArray
+                filledArray,
               );
             }
           };
 
-          urlHandler.resource(this, $http, request.httpConfig, request.headers, request.params, what,
-            this[config.restangularFields.etag], operation)[method]().then(okCallback, function error(response) {
+          urlHandler.resource(
+            this,
+            $http,
+            request.httpConfig,
+            request.headers,
+            request.params,
+            what,
+            this[config.restangularFields.etag],
+            operation,
+          )[method]().then(okCallback, (response) => {
             if (response.status === 304 && __this[config.restangularFields.restangularCollection]) {
               resolvePromise(deferred, response, __this, filledArray);
-            } else if (_.every(config.errorInterceptors, function(cb) {
-                return cb(response, deferred, okCallback) !== false;
-              })) {
+            } else if (_.every(config.errorInterceptors, (cb) => cb(response, deferred, okCallback) !== false)) {
               // triggered if no callback returns false
               deferred.reject(response);
             }
@@ -1219,41 +1221,47 @@
         function save(params, headers) {
           if (this[config.restangularFields.fromServer]) {
             return this[config.restangularFields.put](params, headers);
-          } else {
-            return _.bind(elemFunction, this)('post', undefined, params, undefined, headers);
           }
+          return _.bind(elemFunction, this)('post', undefined, params, undefined, headers);
         }
 
         function elemFunction(operation, what, params, obj, headers) {
-          var __this = this;
-          var deferred = $q.defer();
-          var resParams = params || {};
-          var route = what || this[config.restangularFields.route];
-          var fetchUrl = urlHandler.fetchUrl(this, what);
+          const __this = this;
+          const deferred = $q.defer();
+          const resParams = params || {};
+          const route = what || this[config.restangularFields.route];
+          const fetchUrl = urlHandler.fetchUrl(this, what);
 
-          var callObj = obj || this;
+          let callObj = obj || this;
           // fallback to etag on restangular object (since for custom methods we probably don't explicitly specify the etag field)
-          var etag = callObj[config.restangularFields.etag] || (operation !== 'post' ? this[config.restangularFields.etag] : null);
+          const etag = callObj[config.restangularFields.etag] || (operation !== 'post' ? this[config.restangularFields.etag] : null);
 
           if (_.isObject(callObj) && config.isRestangularized(callObj)) {
             callObj = stripRestangular(callObj);
           }
-          var request = config.fullRequestInterceptor(callObj, operation, route, fetchUrl,
-            headers || {}, resParams || {}, this[config.restangularFields.httpConfig] || {});
+          const request = config.fullRequestInterceptor(
+            callObj,
+            operation,
+            route,
+            fetchUrl,
+            headers || {},
+            resParams || {},
+            this[config.restangularFields.httpConfig] || {},
+          );
 
-          var filledObject = {};
+          let filledObject = {};
           filledObject = config.transformElem(filledObject, false, route, service);
 
-          var okCallback = function(response) {
-            var resData = response.data;
-            var fullParams = response.config.params;
-            var elem = parseResponse(resData, operation, route, fetchUrl, response, deferred);
+          const okCallback = function (response) {
+            const resData = response.data;
+            const fullParams = response.config.params;
+            const elem = parseResponse(resData, operation, route, fetchUrl, response, deferred);
 
             // accept 0 as response
             if (elem !== null && elem !== undefined && elem !== '') {
-              var data;
+              let data;
 
-              if (true === config.plainByDefault) {
+              if (config.plainByDefault === true) {
                 return resolvePromise(deferred, response, elem, filledObject);
               }
 
@@ -1264,7 +1272,7 @@
                   route,
                   true,
                   null,
-                  fullParams
+                  fullParams,
                 );
                 resolvePromise(deferred, response, data, filledObject);
               } else {
@@ -1274,36 +1282,33 @@
                   __this[config.restangularFields.route],
                   true,
                   null,
-                  fullParams
+                  fullParams,
                 );
 
                 data[config.restangularFields.singleOne] = __this[config.restangularFields.singleOne];
                 resolvePromise(deferred, response, data, filledObject);
               }
-
             } else {
               resolvePromise(deferred, response, undefined, filledObject);
             }
           };
 
-          var errorCallback = function(response) {
+          const errorCallback = function (response) {
             if (response.status === 304 && config.isSafe(operation)) {
               resolvePromise(deferred, response, __this, filledObject);
-            } else if (_.every(config.errorInterceptors, function(cb) {
-                return cb(response, deferred, okCallback) !== false;
-              })) {
+            } else if (_.every(config.errorInterceptors, (cb) => cb(response, deferred, okCallback) !== false)) {
               // triggered if no callback returns false
               deferred.reject(response);
             }
           };
           // Overriding HTTP Method
-          var callOperation = operation;
-          var callHeaders = _.extend({}, request.headers);
-          var isOverrideOperation = config.isOverridenMethod(operation);
+          let callOperation = operation;
+          let callHeaders = _.extend({}, request.headers);
+          const isOverrideOperation = config.isOverridenMethod(operation);
           if (isOverrideOperation) {
             callOperation = 'post';
             callHeaders = _.extend(callHeaders, {
-              'X-HTTP-Method-Override': operation === 'remove' ? 'DELETE' : operation.toUpperCase()
+              'X-HTTP-Method-Override': operation === 'remove' ? 'DELETE' : operation.toUpperCase(),
             });
           } else if (config.jsonp && callOperation === 'get') {
             callOperation = 'jsonp';
@@ -1311,15 +1316,39 @@
 
           if (config.isSafe(operation)) {
             if (isOverrideOperation) {
-              urlHandler.resource(this, $http, request.httpConfig, callHeaders, request.params,
-                what, etag, callOperation)[callOperation]({}).then(okCallback, errorCallback);
+              urlHandler.resource(
+                this,
+                $http,
+                request.httpConfig,
+                callHeaders,
+                request.params,
+                what,
+                etag,
+                callOperation,
+              )[callOperation]({}).then(okCallback, errorCallback);
             } else {
-              urlHandler.resource(this, $http, request.httpConfig, callHeaders, request.params,
-                what, etag, callOperation)[callOperation]().then(okCallback, errorCallback);
+              urlHandler.resource(
+                this,
+                $http,
+                request.httpConfig,
+                callHeaders,
+                request.params,
+                what,
+                etag,
+                callOperation,
+              )[callOperation]().then(okCallback, errorCallback);
             }
           } else {
-            urlHandler.resource(this, $http, request.httpConfig, callHeaders, request.params,
-              what, etag, callOperation)[callOperation](request.element).then(okCallback, errorCallback);
+            urlHandler.resource(
+              this,
+              $http,
+              request.httpConfig,
+              callHeaders,
+              request.params,
+              what,
+              etag,
+              callOperation,
+            )[callOperation](request.element).then(okCallback, errorCallback);
           }
 
           return restangularizePromise(deferred.promise, false, filledObject);
@@ -1362,22 +1391,22 @@
         }
 
         function addRestangularMethodFunction(name, operation, path, defaultParams, defaultHeaders, defaultElem) {
-          var bindedFunction;
+          let bindedFunction;
           if (operation === 'getList') {
             bindedFunction = _.bind(fetchFunction, this, path);
           } else {
             bindedFunction = _.bind(customFunction, this, operation, path);
           }
 
-          var createdFunction = function(params, headers, elem) {
-            var callParams = _.defaults({
-              params: params,
-              headers: headers,
-              elem: elem
+          const createdFunction = function (params, headers, elem) {
+            const callParams = _.defaults({
+              params,
+              headers,
+              elem,
             }, {
               params: defaultParams,
               headers: defaultHeaders,
-              elem: defaultElem
+              elem: defaultElem,
             });
             return bindedFunction(callParams.params, callParams.headers, callParams.elem);
           };
@@ -1385,30 +1414,30 @@
           if (config.isSafe(operation)) {
             this[name] = createdFunction;
           } else {
-            this[name] = function(elem, params, headers) {
+            this[name] = function (elem, params, headers) {
               return createdFunction(params, headers, elem);
             };
           }
         }
 
         function withConfigurationFunction(configurer) {
-          var newConfig = angular.copy(_.omit(config, 'configuration'));
+          const newConfig = angular.copy(_.omit(config, 'configuration'));
           Configurer.init(newConfig, newConfig);
           configurer(newConfig);
           return createServiceForConfiguration(newConfig);
         }
 
         function toService(route, parent) {
-          var knownCollectionMethods = _.values(config.restangularFields);
-          var serv = {};
-          var collection = (parent || service).all(route);
+          const knownCollectionMethods = _.values(config.restangularFields);
+          const serv = {};
+          const collection = (parent || service).all(route);
           serv.one = _.bind(one, (parent || service), parent, route);
           serv.post = _.bind(collection.post, collection);
           serv.getList = _.bind(collection.getList, collection);
           serv.withHttpConfig = _.bind(collection.withHttpConfig, collection);
           serv.get = _.bind(collection.get, collection);
 
-          for (var prop in collection) {
+          for (const prop in collection) {
             if (collection.hasOwnProperty(prop) && _.isFunction(collection[prop]) && !_.includes(knownCollectionMethods, prop)) {
               serv[prop] = _.bind(collection[prop], collection);
             }
@@ -1416,7 +1445,6 @@
 
           return serv;
         }
-
 
         Configurer.init(service, config);
 

@@ -1,17 +1,15 @@
-'use strict';
-
 /**
  * Modal import controller.
  */
-angular.module('docs').controller('ModalImport', function ($scope, $uibModalInstance, file, $q, $timeout) {
+angular.module('docs').controller('ModalImport', ($scope, $uibModalInstance, file, $q, $timeout) => {
   // Payload
-  var formData = new FormData();
+  const formData = new FormData();
   formData.append('file', file, file.name);
 
   // Send the file
-  var deferred = $q.defer();
-  var getProgressListener = function(deferred) {
-    return function(event) {
+  const deferred = $q.defer();
+  const getProgressListener = function (deferred) {
+    return function (event) {
       deferred.notify(event);
     };
   };
@@ -23,31 +21,30 @@ angular.module('docs').controller('ModalImport', function ($scope, $uibModalInst
     cache: false,
     contentType: false,
     processData: false,
-    success: function(response) {
+    success(response) {
       deferred.resolve(response);
     },
-    error: function(jqXHR) {
+    error(jqXHR) {
       deferred.reject(jqXHR);
     },
-    xhr: function() {
-      var myXhr = $.ajaxSettings.xhr();
-      myXhr.upload.addEventListener(
-        'progress', getProgressListener(deferred), false);
+    xhr() {
+      const myXhr = $.ajaxSettings.xhr();
+      myXhr.upload.addEventListener('progress', getProgressListener(deferred), false);
       return myXhr;
-    }
+    },
   });
 
-  deferred.promise.then(function(data) {
+  deferred.promise.then((data) => {
     $uibModalInstance.close(data);
-  }, function(data) {
+  }, (data) => {
     $scope.errorQuota = data.responseJSON && data.responseJSON.type === 'QuotaReached';
     if (!$scope.errorQuota) {
       $scope.errorGeneral = true;
     }
-    $timeout(function () {
+    $timeout(() => {
       $uibModalInstance.close(null);
     }, 3000);
-  }, function(e) {
+  }, (e) => {
     $scope.progress = e.loaded / e.total;
   });
 });
